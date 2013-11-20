@@ -2,6 +2,9 @@ package server.status.check;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.net.SocketTimeoutException;
+
+import server.status.Settings;
 
 public class Socket implements Checker {
 	private InetSocketAddress socketAddress;
@@ -11,16 +14,17 @@ public class Socket implements Checker {
 	}
 
 	@Override
-	public boolean check() {
+	public Result check() {
 		try {
 			java.net.Socket s = new java.net.Socket();
-			s.connect(socketAddress, 5000);
+			s.connect(socketAddress, Settings.getTimeoutMS());
 			s.close();
-			return true;
+			return Result.PASS;
+		} catch (SocketTimeoutException e) {
+			return Result.FAIL;
 		} catch (IOException e) {
-			// Ignore errors
 			e.printStackTrace();
+			return Result.INCONCLUSIVE;
 		}
-		return false;
 	}
 }

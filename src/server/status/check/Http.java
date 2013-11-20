@@ -3,7 +3,10 @@ package server.status.check;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.SocketTimeoutException;
 import java.net.URL;
+
+import server.status.Settings;
 
 public class Http implements Checker {
 	static {
@@ -12,29 +15,31 @@ public class Http implements Checker {
 	}
 
 	private URL url;
+	private int responseCode;
 
-	public Http(String host, int port) throws MalformedURLException {
+	public Http(String host, int port, int responseCode)
+			throws MalformedURLException {
 		url = new URL("http", host, port, "");
+		this.responseCode = responseCode;
 	}
 
 	@Override
-	public boolean check() {
-		HttpURLConnection urlConnection = null;
+	public Result check() {
 		try {
-			urlConnection = (HttpURLConnection) url.openConnection();
-			urlConnection.setConnectTimeout(5000);
-			urlConnection.setReadTimeout(5000);
+			HttpURLConnection urlConnection = (HttpURLConnection) url
+					.openConnection();
+			urlConnection.setConnectTimeout(Settings.getTimeoutMS());
+			urlConnection.setReadTimeout(Settings.getTimeoutMS());
 			urlConnection.setRequestMethod("GET");
 			int responseCode = urlConnection.getResponseCode();
-			return responseCode != -1;
+			urlConnection.disconnect();
+			return this.responseCode == responseCode ? Result.PASS
+					: Result.FAIL;
+		} catch (SocketTimeoutException e) {
+			return Result.FAIL;
 		} catch (IOException e) {
-			// Ignore errors
 			e.printStackTrace();
-		} finally {
-			if (urlConnection != null) {
-				urlConnection.disconnect();
-			}
+			return Result.INCONCLUSIVE;
 		}
-		return false;
 	}
 }

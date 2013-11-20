@@ -2,6 +2,8 @@ package server.status.check;
 
 import java.io.IOException;
 
+import server.status.Settings;
+
 public class Ping implements Checker {
 	private String host;
 
@@ -10,18 +12,19 @@ public class Ping implements Checker {
 	}
 
 	@Override
-	public boolean check() {
+	public Result check() {
 		try {
-			Process p = Runtime.getRuntime().exec("ping -c 1 -w 5 " + host);
+			Process p = Runtime.getRuntime().exec(
+					"ping -c 1 -w " + Settings.getTimeout() + " " + host);
 			int exitCode = p.waitFor();
-			return exitCode == 0; // Exit code 0 means OK
+			// Exit code 0 means OK
+			return exitCode == 0 ? Result.PASS : Result.FAIL;
 		} catch (IOException e) {
-			// Ignore errors
 			e.printStackTrace();
+			return Result.INCONCLUSIVE;
 		} catch (InterruptedException e) {
-			// Ignore errors
 			e.printStackTrace();
+			return Result.INCONCLUSIVE;
 		}
-		return false;
 	}
 }
