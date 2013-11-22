@@ -1,7 +1,7 @@
 package server.status.check;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
+import java.net.ConnectException;
 import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.security.GeneralSecurityException;
@@ -10,6 +10,7 @@ import java.security.cert.X509Certificate;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLHandshakeException;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
@@ -44,24 +45,24 @@ public class Https implements Checker {
 		}
 	};
 
-	private URL url;
+	private int port;
 	private int responseCode;
 	private boolean allCertificates;
 
-	public Https(String host, int port, int responseCode,
-			boolean allCertificates) throws MalformedURLException {
-		url = new URL("https", host, port, "");
+	public Https(int port, int responseCode, boolean allCertificates) {
+		this.port = port;
 		this.responseCode = responseCode;
 		this.allCertificates = allCertificates;
 	}
 
 	@Override
-	public Result check() {
+	public Result check(String host, Settings settings) {
 		try {
+			URL url = new URL("https", host, port, "");
 			HttpsURLConnection urlConnection = (HttpsURLConnection) url
 					.openConnection();
-			urlConnection.setConnectTimeout(Settings.getTimeoutMS());
-			urlConnection.setReadTimeout(Settings.getTimeoutMS());
+			urlConnection.setConnectTimeout(settings.getTimeoutMS());
+			urlConnection.setReadTimeout(settings.getTimeoutMS());
 			urlConnection.setRequestMethod("GET");
 			if (allCertificates) {
 				// Set up a factory that allows all SSL certificates
@@ -78,6 +79,10 @@ public class Https implements Checker {
 			return Result.FAIL;
 		} catch (SSLHandshakeException e) {
 			return Result.FAIL;
+		} catch (ConnectException e) {
+			return Result.FAIL;
+		} catch (SSLException e) {
+			return Result.FAIL;
 		} catch (IOException e) {
 			e.printStackTrace();
 			return Result.INCONCLUSIVE;
@@ -85,5 +90,10 @@ public class Https implements Checker {
 			e.printStackTrace();
 			return Result.INCONCLUSIVE;
 		}
+	}
+
+	@Override
+	public String toString() {
+		return "Https " + port + " " + responseCode + " " + allCertificates;
 	}
 }

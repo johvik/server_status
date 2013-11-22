@@ -5,17 +5,12 @@ import java.io.IOException;
 import server.status.Settings;
 
 public class Ping implements Checker {
-	private String host;
-
-	public Ping(String host) {
-		this.host = host;
-	}
 
 	@Override
-	public Result check() {
+	public Result check(String host, Settings settings) {
 		try {
 			Process p = Runtime.getRuntime().exec(
-					"ping -c 1 -w " + Settings.getTimeout() + " " + host);
+					"ping -c 1 -w " + settings.getTimeout() + " " + host);
 			int exitCode = p.waitFor();
 			// Exit code 0 means OK
 			return exitCode == 0 ? Result.PASS : Result.FAIL;
@@ -26,5 +21,10 @@ public class Ping implements Checker {
 			e.printStackTrace();
 			return Result.INCONCLUSIVE;
 		}
+	}
+
+	@Override
+	public String toString() {
+		return "Ping";
 	}
 }

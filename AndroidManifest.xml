@@ -7,8 +7,11 @@
     <uses-sdk
         android:minSdkVersion="8"
         android:targetSdkVersion="18" />
-    
+
+    <!-- To send requests to the server -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- To start after reboot -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <application
         android:allowBackup="true"
@@ -24,6 +27,20 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name="server.status.SettingsActivity" >
+        </activity>
+
+        <receiver android:name="server.status.service.Bootup" >
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+        <receiver android:name="server.status.service.Schedule" >
+        </receiver>
+
+        <service
+            android:name="server.status.service.ServerCheck"
+            android:exported="false" />
     </application>
 
 </manifest>

@@ -2,7 +2,15 @@
 <resources>
 
     <string name="app_name">Server Status</string>
+    <string name="ten">10</string>
+    <string name="five_thousand">5000</string>
+    <string name="action_add_server">Add server</string>
     <string name="action_settings">Settings</string>
-    <string name="hello_world">Hello world!</string>
+    <string name="pref_enabled">Enabled</string>
+    <string name="pref_enabled_summ">Run status updates on a schedule</string>
+    <string name="pref_interval">Interval</string>
+    <string name="pref_interval_summ">%1$s minutes between updates</string>
+    <string name="pref_timeout">Timeout</string>
+    <string name="pref_timeout_summ">Connections timeout after %1$s milliseconds</string>
 
 </resources>

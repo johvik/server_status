@@ -1,8 +1,8 @@
 package server.status.check;
 
 import java.io.IOException;
+import java.net.ConnectException;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
 import java.net.URL;
 
@@ -14,22 +14,22 @@ public class Http implements Checker {
 		HttpURLConnection.setFollowRedirects(false);
 	}
 
-	private URL url;
+	private int port;
 	private int responseCode;
 
-	public Http(String host, int port, int responseCode)
-			throws MalformedURLException {
-		url = new URL("http", host, port, "");
+	public Http(int port, int responseCode) {
+		this.port = port;
 		this.responseCode = responseCode;
 	}
 
 	@Override
-	public Result check() {
+	public Result check(String host, Settings settings) {
 		try {
+			URL url = new URL("http", host, port, "");
 			HttpURLConnection urlConnection = (HttpURLConnection) url
 					.openConnection();
-			urlConnection.setConnectTimeout(Settings.getTimeoutMS());
-			urlConnection.setReadTimeout(Settings.getTimeoutMS());
+			urlConnection.setConnectTimeout(settings.getTimeoutMS());
+			urlConnection.setReadTimeout(settings.getTimeoutMS());
 			urlConnection.setRequestMethod("GET");
 			int responseCode = urlConnection.getResponseCode();
 			urlConnection.disconnect();
@@ -37,9 +37,16 @@ public class Http implements Checker {
 					: Result.FAIL;
 		} catch (SocketTimeoutException e) {
 			return Result.FAIL;
+		} catch (ConnectException e) {
+			return Result.FAIL;
 		} catch (IOException e) {
 			e.printStackTrace();
 			return Result.INCONCLUSIVE;
 		}
+	}
+
+	@Override
+	public String toString() {
+		return "Http " + port + " " + responseCode;
 	}
 }
