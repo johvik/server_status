@@ -56,7 +56,7 @@ public class Https implements Checker {
 	}
 
 	@Override
-	public Result check(String host, Settings settings) {
+	public Status check(String host, Settings settings) {
 		try {
 			URL url = new URL("https", host, port, "");
 			HttpsURLConnection urlConnection = (HttpsURLConnection) url
@@ -73,22 +73,22 @@ public class Https implements Checker {
 			}
 			int responseCode = urlConnection.getResponseCode();
 			urlConnection.disconnect();
-			return this.responseCode == responseCode ? Result.PASS
-					: Result.FAIL;
+			if (this.responseCode == responseCode) {
+				return Status.pass();
+			}
+			return Status.fail("Response code " + responseCode);
 		} catch (SocketTimeoutException e) {
-			return Result.FAIL;
+			return Status.fail("Timeout");
 		} catch (SSLHandshakeException e) {
-			return Result.FAIL;
+			return Status.fail("SSL handshake exception");
 		} catch (ConnectException e) {
-			return Result.FAIL;
+			return Status.fail("Connection failure");
 		} catch (SSLException e) {
-			return Result.FAIL;
+			return Status.fail("SSL exception");
 		} catch (IOException e) {
-			e.printStackTrace();
-			return Result.INCONCLUSIVE;
+			return Status.inconclusive(e);
 		} catch (GeneralSecurityException e) {
-			e.printStackTrace();
-			return Result.INCONCLUSIVE;
+			return Status.inconclusive(e);
 		}
 	}
 

@@ -20,21 +20,24 @@ public class Starter {
 	 *            Number of milliseconds to wait for the first run.
 	 */
 	public static void start(Context context, int firstDelay) {
-		AlarmManager alarmManager = (AlarmManager) context
-				.getSystemService(Context.ALARM_SERVICE);
-		Intent intent = new Intent(context, Schedule.class);
-		boolean alarmUp = PendingIntent.getBroadcast(context, REQUEST_CODE,
-				intent, PendingIntent.FLAG_NO_CREATE) != null;
-		Log.d("Starter", "start " + alarmUp);
-		if (!alarmUp) {
-			// Start if not running
-			PendingIntent pendingIntent = PendingIntent.getBroadcast(context,
-					REQUEST_CODE, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-			Settings settings = new Settings();
-			settings.loadSettings(context);
-			alarmManager.setRepeating(AlarmManager.RTC_WAKEUP,
-					System.currentTimeMillis() + firstDelay,
-					settings.getIntervalMS(), pendingIntent);
+		Settings settings = new Settings();
+		settings.loadSettings(context);
+		if (settings.isEnabled()) {
+			AlarmManager alarmManager = (AlarmManager) context
+					.getSystemService(Context.ALARM_SERVICE);
+			Intent intent = new Intent(context, Schedule.class);
+			boolean alarmUp = PendingIntent.getBroadcast(context, REQUEST_CODE,
+					intent, PendingIntent.FLAG_NO_CREATE) != null;
+			Log.d("Starter", "start " + alarmUp);
+			if (!alarmUp) {
+				// Start if not running
+				PendingIntent pendingIntent = PendingIntent.getBroadcast(
+						context, REQUEST_CODE, intent,
+						PendingIntent.FLAG_UPDATE_CURRENT);
+				alarmManager.setRepeating(AlarmManager.RTC_WAKEUP,
+						System.currentTimeMillis() + firstDelay,
+						settings.getIntervalMS(), pendingIntent);
+			}
 		}
 	}
 

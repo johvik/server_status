@@ -15,20 +15,19 @@ public class Socket implements Checker {
 	}
 
 	@Override
-	public Result check(String host, Settings settings) {
+	public Status check(String host, Settings settings) {
 		try {
 			InetSocketAddress socketAddress = new InetSocketAddress(host, port);
 			java.net.Socket s = new java.net.Socket();
 			s.connect(socketAddress, settings.getTimeoutMS());
 			s.close();
-			return Result.PASS;
+			return Status.pass();
 		} catch (SocketTimeoutException e) {
-			return Result.FAIL;
+			return Status.fail("Timeout");
 		} catch (ConnectException e) {
-			return Result.FAIL;
+			return Status.fail("Connection failure");
 		} catch (IOException e) {
-			e.printStackTrace();
-			return Result.INCONCLUSIVE;
+			return Status.inconclusive(e);
 		}
 	}
 

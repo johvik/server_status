@@ -23,7 +23,7 @@ public class Http implements Checker {
 	}
 
 	@Override
-	public Result check(String host, Settings settings) {
+	public Status check(String host, Settings settings) {
 		try {
 			URL url = new URL("http", host, port, "");
 			HttpURLConnection urlConnection = (HttpURLConnection) url
@@ -33,15 +33,16 @@ public class Http implements Checker {
 			urlConnection.setRequestMethod("GET");
 			int responseCode = urlConnection.getResponseCode();
 			urlConnection.disconnect();
-			return this.responseCode == responseCode ? Result.PASS
-					: Result.FAIL;
+			if (this.responseCode == responseCode) {
+				return Status.pass();
+			}
+			return Status.fail("Response code " + responseCode);
 		} catch (SocketTimeoutException e) {
-			return Result.FAIL;
+			return Status.fail("Timeout");
 		} catch (ConnectException e) {
-			return Result.FAIL;
+			return Status.fail("Connection failure");
 		} catch (IOException e) {
-			e.printStackTrace();
-			return Result.INCONCLUSIVE;
+			return Status.inconclusive(e);
 		}
 	}
 
