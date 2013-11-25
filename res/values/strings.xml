@@ -12,5 +12,10 @@
     <string name="pref_interval_summ">%1$s minutes between updates</string>
     <string name="pref_timeout">Timeout</string>
     <string name="pref_timeout_summ">Connections timeout after %1$s milliseconds</string>
+    <string name="last_update">Last update: %1$s</string>
+    <string name="never">Never</string>
+    <string name="empty_server_list">No servers added =(</string>
+    <string name="server_add_fail">Failed to add server</string>
+    <string name="server_remove_fail">Failed to remove server</string>
 
 </resources>

@@ -83,4 +83,17 @@ public class Server {
 	public String toString() {
 		return id + " " + host + " " + checkers + " " + results;
 	}
+
+	public long getOldestTime() {
+		long oldestTime = Long.MAX_VALUE;
+		for (Status status : results) {
+			if (status.time < oldestTime) {
+				oldestTime = status.time;
+			}
+		}
+		if (oldestTime != Long.MAX_VALUE) {
+			return oldestTime;
+		}
+		return 0;
+	}
 }
