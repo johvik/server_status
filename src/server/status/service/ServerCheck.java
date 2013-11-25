@@ -1,5 +1,7 @@
 package server.status.service;
 
+import java.util.ArrayList;
+
 import server.status.Server;
 import server.status.Settings;
 import android.app.IntentService;
@@ -20,8 +22,10 @@ public class ServerCheck extends IntentService {
 		settings.loadSettings(context);
 		if (settings.isEnabled()) { // Extra check if something gets messed up
 			settings.loadServers(context);
-			for (Server server : settings.getServers()) {
-				server.check(settings);
+			ArrayList<Server> servers = settings.getServers();
+			Log.d("ServerCheck", servers.toString());
+			for (Server server : servers) {
+				server.check(settings, context);
 			}
 		}
 	}

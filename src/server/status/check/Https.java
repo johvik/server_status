@@ -18,7 +18,7 @@ import javax.net.ssl.X509TrustManager;
 
 import server.status.Settings;
 
-public class Https implements Checker {
+public class Https extends Checker {
 	static {
 		// Do not follow redirects
 		HttpsURLConnection.setFollowRedirects(false);
@@ -50,6 +50,11 @@ public class Https implements Checker {
 	private boolean allCertificates;
 
 	public Https(int port, int responseCode, boolean allCertificates) {
+		this(-1, port, responseCode, allCertificates);
+	}
+
+	public Https(long id, int port, int responseCode, boolean allCertificates) {
+		super(id);
 		this.port = port;
 		this.responseCode = responseCode;
 		this.allCertificates = allCertificates;
@@ -95,5 +100,32 @@ public class Https implements Checker {
 	@Override
 	public String toString() {
 		return "Https " + port + " " + responseCode + " " + allCertificates;
+	}
+
+	@Override
+	public Type getType() {
+		return Type.HTTPS;
+	}
+
+	@Override
+	public String getArgs() {
+		return port + " " + responseCode + " " + allCertificates;
+	}
+
+	public static Https parse(long id, String args) {
+		String[] split = args.split(" ");
+		int port;
+		int responseCode;
+		boolean allCertificates;
+		if (split.length == 3) {
+			port = Integer.parseInt(split[0]);
+			responseCode = Integer.parseInt(split[1]);
+			allCertificates = Boolean.parseBoolean(split[2]);
+		} else {
+			port = 443;
+			responseCode = 200;
+			allCertificates = false;
+		}
+		return new Https(id, port, responseCode, allCertificates);
 	}
 }

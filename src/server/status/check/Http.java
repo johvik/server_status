@@ -8,7 +8,7 @@ import java.net.URL;
 
 import server.status.Settings;
 
-public class Http implements Checker {
+public class Http extends Checker {
 	static {
 		// Do not follow redirects
 		HttpURLConnection.setFollowRedirects(false);
@@ -18,6 +18,11 @@ public class Http implements Checker {
 	private int responseCode;
 
 	public Http(int port, int responseCode) {
+		this(-1, port, responseCode);
+	}
+
+	public Http(long id, int port, int responseCode) {
+		super(id);
 		this.port = port;
 		this.responseCode = responseCode;
 	}
@@ -49,5 +54,29 @@ public class Http implements Checker {
 	@Override
 	public String toString() {
 		return "Http " + port + " " + responseCode;
+	}
+
+	@Override
+	public Type getType() {
+		return Type.HTTP;
+	}
+
+	@Override
+	public String getArgs() {
+		return port + " " + responseCode;
+	}
+
+	public static Http parse(long id, String args) {
+		String[] split = args.split(" ");
+		int port;
+		int responseCode;
+		if (split.length == 2) {
+			port = Integer.parseInt(split[0]);
+			responseCode = Integer.parseInt(split[1]);
+		} else {
+			port = 80;
+			responseCode = 200;
+		}
+		return new Http(id, port, responseCode);
 	}
 }

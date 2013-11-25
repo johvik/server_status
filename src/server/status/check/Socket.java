@@ -7,10 +7,15 @@ import java.net.SocketTimeoutException;
 
 import server.status.Settings;
 
-public class Socket implements Checker {
+public class Socket extends Checker {
 	private int port;
 
 	public Socket(int port) {
+		this(-1, port);
+	}
+
+	public Socket(long id, int port) {
+		super(id);
 		this.port = port;
 	}
 
@@ -34,5 +39,26 @@ public class Socket implements Checker {
 	@Override
 	public String toString() {
 		return "Socket " + port;
+	}
+
+	@Override
+	public Type getType() {
+		return Type.SOCKET;
+	}
+
+	@Override
+	public String getArgs() {
+		return String.valueOf(port);
+	}
+
+	public static Socket parse(long id, String args) {
+		String[] split = args.split(" ");
+		int port;
+		if (split.length == 1) {
+			port = Integer.parseInt(split[0]);
+		} else {
+			port = 8000; // What to use here?
+		}
+		return new Socket(id, port);
 	}
 }

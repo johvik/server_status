@@ -4,7 +4,15 @@ import java.io.IOException;
 
 import server.status.Settings;
 
-public class Ping implements Checker {
+public class Ping extends Checker {
+
+	public Ping() {
+		this(-1);
+	}
+
+	public Ping(long id) {
+		super(id);
+	}
 
 	@Override
 	public Status check(String host, Settings settings) {
@@ -27,5 +35,19 @@ public class Ping implements Checker {
 	@Override
 	public String toString() {
 		return "Ping";
+	}
+
+	@Override
+	public Type getType() {
+		return Type.PING;
+	}
+
+	@Override
+	public String getArgs() {
+		return "";
+	}
+
+	public static Ping parse(long id, String args) {
+		return new Ping(id);
 	}
 }

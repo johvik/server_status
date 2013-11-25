@@ -1,5 +1,11 @@
 package server.status;
 
+import server.status.check.Http;
+import server.status.check.Https;
+import server.status.check.Ping;
+import server.status.check.Socket;
+import server.status.db.ServerDbHelper;
+import server.status.service.Starter;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.app.Activity;
@@ -14,6 +20,8 @@ public class MainActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
+		// Make sure it is started if enabled
+		Starter.start(getApplicationContext(), Settings.ENABLE_DELAY);
 	}
 
 	@Override
@@ -26,7 +34,14 @@ public class MainActivity extends Activity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.action_add_server:
-			// TODO Add server
+			// TODO Add server in new thread
+			Server server = new Server("192.168.1.1");
+			server.addChecker(new Http(8000, 302));
+			server.addChecker(new Https(8080, 200, true));
+			server.addChecker(new Ping());
+			server.addChecker(new Socket(50022));
+			boolean saved = ServerDbHelper.getInstance(getApplicationContext())
+					.save(server);
 			return true;
 		case R.id.action_settings:
 			showSettings();

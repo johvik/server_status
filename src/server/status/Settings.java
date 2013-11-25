@@ -2,10 +2,7 @@ package server.status;
 
 import java.util.ArrayList;
 
-import server.status.check.Http;
-import server.status.check.Https;
-import server.status.check.Ping;
-import server.status.check.Socket;
+import server.status.db.ServerDbHelper;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
@@ -41,14 +38,7 @@ public class Settings {
 	}
 
 	public void loadServers(Context context) {
-		// TODO Load servers
-		servers.clear();
-		Server test = new Server("192.168.1.1");
-		test.addChecker(new Http(8000, 302));
-		test.addChecker(new Https(8080, 200, true));
-		test.addChecker(new Ping());
-		test.addChecker(new Socket(50022));
-		servers.add(test);
+		servers = ServerDbHelper.getInstance(context).load();
 	}
 
 	private void setTimeoutMS(int timeoutMS) {
