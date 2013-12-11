@@ -46,7 +46,13 @@ public class ServerListFragment extends Fragment {
 	}
 
 	public void addServer(Server server) {
-		servers.add(server);
+		// Add in order
+		int index = Collections.binarySearch(servers, server);
+		if (index < 0) {
+			servers.add((-index) - 1, server);
+		} else {
+			servers.add(index, server);
+		}
 		serverAdapter.notifyDataSetChanged();
 	}
 

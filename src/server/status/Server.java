@@ -59,7 +59,7 @@ public class Server implements Comparable<Server> {
 	}
 
 	public void addChecker(Checker checker) {
-		add(checker, Status.inconclusive("Not tested"));
+		add(checker, Status.initial());
 	}
 
 	public void add(Checker checker, Status status) {
@@ -132,26 +132,17 @@ public class Server implements Comparable<Server> {
 	@Override
 	public int compareTo(Server another) {
 		// Order: fail -> inconclusive -> host -> id
-		boolean hasFail = hasFail();
-		if (hasFail && another.hasFail()) {
-			boolean hasInconclusive = hasInconclusive();
-			if (hasInconclusive && another.hasInconclusive()) {
-				int cmp = host.compareTo(another.host);
+		int cmp = Boolean.valueOf(another.hasFail()).compareTo(hasFail());
+		if (cmp == 0) {
+			cmp = Boolean.valueOf(another.hasInconclusive()).compareTo(
+					hasInconclusive());
+			if (cmp == 0) {
+				cmp = host.compareTo(another.host);
 				if (cmp == 0) {
 					cmp = Long.valueOf(id).compareTo(another.id);
 				}
-				return cmp;
-			} else if (hasInconclusive) {
-				return 1;
-			} else {
-				// Another has inconclusive
-				return -1;
 			}
-		} else if (hasFail) {
-			return 1;
-		} else {
-			// Another has fail
-			return -1;
 		}
+		return cmp;
 	}
 }

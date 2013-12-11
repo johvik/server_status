@@ -46,6 +46,10 @@ public class Status {
 				System.currentTimeMillis());
 	}
 
+	public static Status initial() {
+		return new Status(Result.INCONCLUSIVE, "Not tested", 0);
+	}
+
 	@Override
 	public String toString() {
 		return result + " " + reason + " " + new Date(time);
