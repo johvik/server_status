@@ -9,7 +9,7 @@ import server.status.db.ServerDbHelper;
 import android.content.Context;
 import android.util.Log;
 
-public class Server {
+public class Server implements Comparable<Server> {
 	private long id;
 	private String host;
 	private ArrayList<Checker> checkers = new ArrayList<Checker>();
@@ -38,6 +38,20 @@ public class Server {
 
 	public ArrayList<Status> getResults() {
 		return results;
+	}
+
+	public int getPassCount() {
+		int count = 0;
+		for (Status s : results) {
+			if (s.result == Result.PASS) {
+				count++;
+			}
+		}
+		return count;
+	}
+
+	public int getServerCount() {
+		return results.size();
 	}
 
 	public void setId(long id) {
@@ -95,5 +109,49 @@ public class Server {
 			return oldestTime;
 		}
 		return 0;
+	}
+
+	public boolean hasFail() {
+		for (Status s : results) {
+			if (s.result == Result.FAIL) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public boolean hasInconclusive() {
+		for (Status s : results) {
+			if (s.result == Result.INCONCLUSIVE) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	@Override
+	public int compareTo(Server another) {
+		// Order: fail -> inconclusive -> host -> id
+		boolean hasFail = hasFail();
+		if (hasFail && another.hasFail()) {
+			boolean hasInconclusive = hasInconclusive();
+			if (hasInconclusive && another.hasInconclusive()) {
+				int cmp = host.compareTo(another.host);
+				if (cmp == 0) {
+					cmp = Long.valueOf(id).compareTo(another.id);
+				}
+				return cmp;
+			} else if (hasInconclusive) {
+				return 1;
+			} else {
+				// Another has inconclusive
+				return -1;
+			}
+		} else if (hasFail) {
+			return 1;
+		} else {
+			// Another has fail
+			return -1;
+		}
 	}
 }

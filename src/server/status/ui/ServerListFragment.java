@@ -1,25 +1,36 @@
 package server.status.ui;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 import server.status.R;
 import server.status.Server;
 import server.status.Settings;
 import server.status.db.ServerDbHelper;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnClickListener;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.widget.AdapterView;
+import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.Toast;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ListView;
 
 public class ServerListFragment extends Fragment {
+	private static final int ID_UPDATE = 1;
+	private static final int ID_REMOVE = 2;
+
 	private ServerAdapter serverAdapter;
 	private ArrayList<Server> servers;
 
@@ -30,6 +41,7 @@ public class ServerListFragment extends Fragment {
 		Context context = activity.getApplicationContext();
 		settings.loadServers(context);
 		servers = settings.getServers();
+		Collections.sort(servers);
 		serverAdapter = new ServerAdapter(context, servers);
 	}
 
@@ -38,18 +50,66 @@ public class ServerListFragment extends Fragment {
 		serverAdapter.notifyDataSetChanged();
 	}
 
-	private void remove(int index) {
-		Context context = getActivity().getApplicationContext();
-		Server server = servers.get(index);
-		boolean deleted = ServerDbHelper.getInstance(context).delete(server);
-		if (deleted) {
-			servers.remove(index);
-			serverAdapter.notifyDataSetChanged();
-		} else {
-			Toast.makeText(context,
-					context.getString(R.string.server_remove_fail),
-					Toast.LENGTH_SHORT).show();
-		}
+	/**
+	 * Manually starts an update
+	 * 
+	 * @param index
+	 *            Index of the server to start
+	 */
+	private void update(final Server server) {
+		final Context context = getActivity().getApplicationContext();
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				Settings settings = new Settings();
+				settings.loadSettings(context);
+				server.check(settings, context);
+			}
+		}).start();
+	}
+
+	private void remove(final Server server) {
+		final Activity activity = getActivity();
+		final Context context = activity.getApplicationContext();
+		new AlertDialog.Builder(activity)
+				.setMessage(
+						getString(R.string.server_remove_confirm,
+								server.getHost()))
+				.setPositiveButton(getString(R.string.button_ok),
+						new OnClickListener() {
+							@Override
+							public void onClick(DialogInterface dialog,
+									int which) {
+								// OK clicked, lets remove
+								new Thread(new Runnable() {
+									@Override
+									public void run() {
+										final boolean deleted = ServerDbHelper
+												.getInstance(context).delete(
+														server);
+										activity.runOnUiThread(new Runnable() {
+											@Override
+											public void run() {
+												if (deleted) {
+													if (servers.remove(server)) {
+														serverAdapter
+																.notifyDataSetChanged();
+													}
+												} else {
+													Toast.makeText(
+															context,
+															context.getString(R.string.server_remove_fail),
+															Toast.LENGTH_SHORT)
+															.show();
+												}
+											}
+										});
+									}
+								}).start();
+							}
+						})
+				.setNegativeButton(getString(R.string.button_cancel), null)
+				.show();
 	}
 
 	@Override
@@ -65,19 +125,47 @@ public class ServerListFragment extends Fragment {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view,
 					int position, long id) {
-				// TODO
+				// TODO Show details/edit
 			}
 		});
-		listViewServers
-				.setOnItemLongClickListener(new OnItemLongClickListener() {
-					@Override
-					public boolean onItemLongClick(AdapterView<?> parent,
-							View view, int position, long id) {
-						// TODO
-						remove(position);
-						return true;
-					}
-				});
+		// Long click menu
+		registerForContextMenu(listViewServers);
 		return view;
+	}
+
+	@Override
+	public void onCreateContextMenu(ContextMenu menu, View v,
+			ContextMenuInfo menuInfo) {
+		if (v.getId() == R.id.listViewServers) {
+			AdapterContextMenuInfo info = (AdapterContextMenuInfo) menuInfo;
+			Server server = servers.get(info.position);
+			menu.setHeaderTitle(server.getHost());
+			menu.add(Menu.NONE, ID_UPDATE, Menu.NONE,
+					R.string.action_update_server);
+			menu.add(Menu.NONE, ID_REMOVE, Menu.NONE,
+					R.string.action_remove_server);
+		} else {
+			super.onCreateContextMenu(menu, v, menuInfo);
+		}
+	}
+
+	@Override
+	public boolean onContextItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case ID_UPDATE: {
+			AdapterContextMenuInfo info = (AdapterContextMenuInfo) item
+					.getMenuInfo();
+			update(servers.get(info.position));
+			return true;
+		}
+		case ID_REMOVE: {
+			AdapterContextMenuInfo info = (AdapterContextMenuInfo) item
+					.getMenuInfo();
+			remove(servers.get(info.position));
+			return true;
+		}
+		default:
+			return super.onContextItemSelected(item);
+		}
 	}
 }

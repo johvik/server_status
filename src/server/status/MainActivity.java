@@ -39,7 +39,7 @@ public class MainActivity extends FragmentActivity {
 		case R.id.action_add_server:
 			// TODO Add server in new thread
 			Context context = getApplicationContext();
-			Server server = new Server("192.168.1.1");
+			Server server = new Server("192.168.1.200");
 			server.addChecker(new Http(8000, 302));
 			server.addChecker(new Https(8080, 200, true));
 			server.addChecker(new Ping());
