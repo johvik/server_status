@@ -32,17 +32,78 @@ public class ServerListFragment extends Fragment {
 	private static final int ID_REMOVE = 2;
 
 	private ServerAdapter serverAdapter;
-	private ArrayList<Server> servers;
+	private ArrayList<Server> servers = new ArrayList<Server>();
 
 	@Override
 	public void onAttach(Activity activity) {
 		super.onAttach(activity);
-		Settings settings = new Settings();
 		Context context = activity.getApplicationContext();
-		settings.loadServers(context);
-		servers = settings.getServers();
-		Collections.sort(servers);
 		serverAdapter = new ServerAdapter(context, servers);
+		refreshAll();
+	}
+
+	/**
+	 * Refresh server by id
+	 * 
+	 * @param serverId
+	 */
+	public void refresh(final long serverId) {
+		final Activity activity = getActivity();
+		final Context context = activity.getApplicationContext();
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				final Server server = ServerDbHelper.getInstance(context).load(
+						serverId);
+				if (server != null) {
+					Server found = null;
+					// Find old by id
+					for (Server s : servers) {
+						if (s.getId() == serverId) {
+							found = s;
+							break;
+						}
+					}
+					final Server old = found;
+					activity.runOnUiThread(new Runnable() {
+						@Override
+						public void run() {
+							// Remove old
+							if (old != null) {
+								servers.remove(old);
+							}
+							// Add new
+							addServer(server);
+						}
+					});
+				}
+			}
+		});
+	}
+
+	/**
+	 * Replaces the server list with a newly loaded one.
+	 */
+	private void refreshAll() {
+		final Activity activity = getActivity();
+		final Context context = activity.getApplicationContext();
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				Settings settings = new Settings();
+				settings.loadServers(context);
+				final ArrayList<Server> list = settings.getServers();
+				Collections.sort(list);
+				activity.runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
+						servers.clear();
+						servers.addAll(list);
+						serverAdapter.notifyDataSetChanged();
+					}
+				});
+			}
+		}).start();
 	}
 
 	public void addServer(Server server) {
