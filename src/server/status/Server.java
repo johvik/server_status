@@ -7,9 +7,13 @@ import server.status.check.Status;
 import server.status.check.Status.Result;
 import server.status.db.ServerDbHelper;
 import android.content.Context;
+import android.content.Intent;
 import android.util.Log;
 
 public class Server implements Comparable<Server> {
+	public static final String INTENT_ID = "sid";
+	public static final String BROADCAST_UPDATE = "server.status.UPDATE";
+
 	private long id;
 	private String host;
 	private ArrayList<Checker> checkers = new ArrayList<Checker>();
@@ -83,7 +87,10 @@ public class Server implements Comparable<Server> {
 					checker, status);
 			if (saved) {
 				results.set(i, status);
-				// TODO How to report results?
+				// Send update
+				Intent intent = new Intent(BROADCAST_UPDATE);
+				intent.putExtra(INTENT_ID, id);
+				context.sendBroadcast(intent);
 			}
 			if (Result.PASS == status.result) {
 				++ok;

@@ -10,21 +10,47 @@ import server.status.ui.ServerListFragment;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentActivity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
 public class MainActivity extends FragmentActivity {
+	private ServerListFragment serverListFragment;
+	private BroadcastReceiver receiver = new BroadcastReceiver() {
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			long id = intent.getLongExtra(Server.INTENT_ID, -1);
+			if (id != -1) {
+				serverListFragment.refresh(id);
+			}
+		}
+	};
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
+		serverListFragment = (ServerListFragment) getSupportFragmentManager()
+				.findFragmentById(R.id.fragmentServerList);
 		// Make sure it is started if enabled
 		Starter.start(getApplicationContext(), Settings.ENABLE_DELAY);
+	}
+
+	@Override
+	protected void onResume() {
+		registerReceiver(receiver, new IntentFilter(Server.BROADCAST_UPDATE));
+		super.onResume();
+	}
+
+	@Override
+	protected void onPause() {
+		unregisterReceiver(receiver);
+		super.onPause();
 	}
 
 	@Override
@@ -46,9 +72,7 @@ public class MainActivity extends FragmentActivity {
 			server.addChecker(new Socket(50022));
 			boolean saved = ServerDbHelper.getInstance(context).save(server);
 			if (saved) {
-				ServerListFragment fragment = (ServerListFragment) getSupportFragmentManager()
-						.findFragmentById(R.id.fragmentServerList);
-				fragment.addServer(server);
+				serverListFragment.addServer(server);
 			} else {
 				Toast.makeText(context,
 						context.getString(R.string.server_add_fail),
