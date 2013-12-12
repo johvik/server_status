@@ -8,7 +8,6 @@ import server.status.check.Status.Result;
 import server.status.db.ServerDbHelper;
 import android.content.Context;
 import android.content.Intent;
-import android.util.Log;
 
 public class Server implements Comparable<Server> {
 	public static final String INTENT_ID = "sid";
@@ -77,10 +76,8 @@ public class Server implements Comparable<Server> {
 	}
 
 	public void check(Settings settings, Context context) {
-		int ok = 0;
 		int size = checkers.size();
 		for (int i = 0; i < size; i++) {
-			Log.d("Sever", "Checking..." + i);
 			Checker checker = checkers.get(i);
 			Status status = checker.check(host, settings);
 			boolean saved = ServerDbHelper.getInstance(context).save(this,
@@ -92,12 +89,7 @@ public class Server implements Comparable<Server> {
 				intent.putExtra(INTENT_ID, id);
 				context.sendBroadcast(intent);
 			}
-			if (Result.PASS == status.result) {
-				++ok;
-			}
-			Log.d("Server", checker.toString() + " " + host + " " + status);
 		}
-		Log.d("Server", host + " " + (ok == size));
 	}
 
 	@Override
