@@ -26,7 +26,7 @@ public class ServerAdapter extends BaseExpandableListAdapter {
 	private final Context context;
 	private final ArrayList<Server> list;
 	private static final SimpleDateFormat format = new SimpleDateFormat(
-			"HH:mm", Locale.US);
+			"MMM d, HH:mm", Locale.US);
 
 	public ServerAdapter(Context context, ArrayList<Server> list) {
 		this.context = context;
