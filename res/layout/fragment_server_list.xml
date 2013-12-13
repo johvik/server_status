@@ -5,11 +5,11 @@
     android:layout_height="match_parent"
     tools:context=".ui.ServerListFragment" >
 
-    <ListView
+    <ExpandableListView
         android:id="@+id/listViewServers"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:listitem="@layout/list_item_server" />
+        tools:listitem="@android:layout/simple_expandable_list_item_1" />
 
     <TextView
         android:id="@+id/textViewEmptyList"

@@ -130,18 +130,6 @@ public class Server implements Comparable<Server> {
 
 	@Override
 	public int compareTo(Server another) {
-		// Order: fail -> inconclusive -> host -> id
-		int cmp = Boolean.valueOf(another.hasFail()).compareTo(hasFail());
-		if (cmp == 0) {
-			cmp = Boolean.valueOf(another.hasInconclusive()).compareTo(
-					hasInconclusive());
-			if (cmp == 0) {
-				cmp = host.compareTo(another.host);
-				if (cmp == 0) {
-					cmp = Long.valueOf(id).compareTo(another.id);
-				}
-			}
-		}
-		return cmp;
+		return Long.valueOf(id).compareTo(another.id);
 	}
 }

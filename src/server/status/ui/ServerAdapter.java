@@ -6,15 +6,19 @@ import java.util.Locale;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
+import android.widget.BaseExpandableListAdapter;
 import android.widget.TextView;
 import server.status.R;
 import server.status.Server;
+import server.status.check.Checker;
+import server.status.check.Status;
+import server.status.check.Status.Result;
 
-public class ServerAdapter extends BaseAdapter {
+public class ServerAdapter extends BaseExpandableListAdapter {
 	private static final int COLOR_FAIL = Color.parseColor("#DC143C");
 	private static final int COLOR_INCONCLUSIVE = Color.parseColor("#FFA500");
 	private static final int COLOR_PASS = Color.parseColor("#32CD32");
@@ -30,26 +34,27 @@ public class ServerAdapter extends BaseAdapter {
 	}
 
 	@Override
-	public int getCount() {
-		return list.size();
+	public Object getChild(int groupPosition, int childPosition) {
+		Server server = list.get(groupPosition);
+		ArrayList<Checker> checkers = server.getCheckers();
+		ArrayList<Status> results = server.getResults();
+		return Pair.create(checkers.get(childPosition),
+				results.get(childPosition));
 	}
 
 	@Override
-	public Object getItem(int position) {
-		return list.get(position);
+	public long getChildId(int groupPosition, int childPosition) {
+		Server server = list.get(groupPosition);
+		ArrayList<Checker> checkers = server.getCheckers();
+		return checkers.get(childPosition).getId();
 	}
 
-	@Override
-	public long getItemId(int position) {
-		return position;
-	}
-
-	private static class ViewHolder {
+	private static class ChildViewHolder {
 		public final TextView text1;
 		public final TextView text2;
 		public final TextView text3;
 
-		public ViewHolder(TextView text1, TextView text2, TextView text3) {
+		public ChildViewHolder(TextView text1, TextView text2, TextView text3) {
 			this.text1 = text1;
 			this.text2 = text2;
 			this.text3 = text3;
@@ -57,42 +62,122 @@ public class ServerAdapter extends BaseAdapter {
 	}
 
 	@Override
-	public View getView(int position, View convertView, ViewGroup parent) {
+	public View getChildView(int groupPosition, int childPosition,
+			boolean isLastChild, View convertView, ViewGroup parent) {
 		TextView text1;
 		TextView text2;
 		TextView text3;
 		if (convertView == null) {
 			convertView = LayoutInflater.from(context).inflate(
-					R.layout.list_item_server, parent, false);
+					R.layout.list_item_server_details, parent, false);
 			text1 = (TextView) convertView.findViewById(R.id.text1);
 			text2 = (TextView) convertView.findViewById(R.id.text2);
 			text3 = (TextView) convertView.findViewById(R.id.text3);
-			convertView.setTag(new ViewHolder(text1, text2, text3));
+			convertView.setTag(new ChildViewHolder(text1, text2, text3));
 		} else {
-			ViewHolder viewHolder = (ViewHolder) convertView.getTag();
+			ChildViewHolder viewHolder = (ChildViewHolder) convertView.getTag();
 			text1 = viewHolder.text1;
 			text2 = viewHolder.text2;
 			text3 = viewHolder.text3;
 		}
 
-		Server e = list.get(position);
-		text1.setText(e.getHost());
-		long time = e.getOldestTime();
+		@SuppressWarnings("unchecked")
+		Pair<Checker, Status> p = (Pair<Checker, Status>) getChild(
+				groupPosition, childPosition);
+		Checker checker = p.first;
+		Status result = p.second;
+		int color;
+		if (result.result == Result.FAIL) {
+			color = COLOR_FAIL;
+		} else if (result.result == Result.INCONCLUSIVE) {
+			color = COLOR_INCONCLUSIVE;
+		} else {
+			color = COLOR_PASS;
+		}
+		text1.setText(checker.getClass().getSimpleName());
+		long time = result.time;
 		String oldestTime;
 		if (time > 0) {
 			oldestTime = format.format(time);
 		} else {
 			oldestTime = context.getString(R.string.never);
 		}
-		text2.setText(context.getString(R.string.last_update, oldestTime));
-		text3.setText(e.getPassCount() + "/" + e.getServerCount());
-		if (e.hasFail()) {
-			text3.setTextColor(COLOR_FAIL);
-		} else if (e.hasInconclusive()) {
-			text3.setTextColor(COLOR_INCONCLUSIVE);
+		text2.setText(oldestTime);
+		text3.setText(result.reason);
+		if (result.result == Result.PASS || result.reason.length() == 0) {
+			text3.setVisibility(View.GONE);
 		} else {
-			text3.setTextColor(COLOR_PASS);
+			text3.setVisibility(View.VISIBLE);
+		}
+
+		text1.setTextColor(color);
+		text2.setTextColor(color);
+		text3.setTextColor(color);
+		return convertView;
+	}
+
+	@Override
+	public int getChildrenCount(int groupPosition) {
+		return list.get(groupPosition).getServerCount();
+	}
+
+	@Override
+	public Object getGroup(int groupPosition) {
+		return list.get(groupPosition);
+	}
+
+	@Override
+	public int getGroupCount() {
+		return list.size();
+	}
+
+	@Override
+	public long getGroupId(int groupPosition) {
+		return list.get(groupPosition).getId();
+	}
+
+	private static class GroupViewHolder {
+		public final TextView text1;
+
+		public GroupViewHolder(TextView text1) {
+			this.text1 = text1;
+		}
+	}
+
+	@Override
+	public View getGroupView(int groupPosition, boolean isExpanded,
+			View convertView, ViewGroup parent) {
+		TextView text1;
+		if (convertView == null) {
+			convertView = LayoutInflater.from(context).inflate(
+					android.R.layout.simple_expandable_list_item_1, parent,
+					false);
+			text1 = (TextView) convertView.findViewById(android.R.id.text1);
+			convertView.setTag(new GroupViewHolder(text1));
+		} else {
+			GroupViewHolder viewHolder = (GroupViewHolder) convertView.getTag();
+			text1 = viewHolder.text1;
+		}
+
+		Server server = list.get(groupPosition);
+		text1.setText(server.getHost());
+		if (server.hasFail()) {
+			text1.setTextColor(COLOR_FAIL);
+		} else if (server.hasInconclusive()) {
+			text1.setTextColor(COLOR_INCONCLUSIVE);
+		} else {
+			text1.setTextColor(COLOR_PASS);
 		}
 		return convertView;
+	}
+
+	@Override
+	public boolean hasStableIds() {
+		return true;
+	}
+
+	@Override
+	public boolean isChildSelectable(int groupPosition, int childPosition) {
+		return false;
 	}
 }

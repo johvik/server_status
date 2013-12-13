@@ -22,10 +22,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.widget.AdapterView;
-import android.widget.AdapterView.AdapterContextMenuInfo;
+import android.widget.ExpandableListView;
+import android.widget.ExpandableListView.ExpandableListContextMenuInfo;
 import android.widget.Toast;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.ListView;
 
 public class ServerListFragment extends Fragment {
 	private static final int ID_UPDATE = 1;
@@ -184,7 +184,7 @@ public class ServerListFragment extends Fragment {
 			Bundle savedInstanceState) {
 		View view = inflater.inflate(R.layout.fragment_server_list, container,
 				false);
-		ListView listViewServers = (ListView) view
+		ExpandableListView listViewServers = (ExpandableListView) view
 				.findViewById(R.id.listViewServers);
 		listViewServers.setEmptyView(view.findViewById(R.id.textViewEmptyList));
 		listViewServers.setAdapter(serverAdapter);
@@ -204,8 +204,9 @@ public class ServerListFragment extends Fragment {
 	public void onCreateContextMenu(ContextMenu menu, View v,
 			ContextMenuInfo menuInfo) {
 		if (v.getId() == R.id.listViewServers) {
-			AdapterContextMenuInfo info = (AdapterContextMenuInfo) menuInfo;
-			Server server = servers.get(info.position);
+			ExpandableListContextMenuInfo info = (ExpandableListContextMenuInfo) menuInfo;
+			Server server = servers.get(ExpandableListView
+					.getPackedPositionGroup(info.packedPosition));
 			menu.setHeaderTitle(server.getHost());
 			menu.add(Menu.NONE, ID_UPDATE, Menu.NONE,
 					R.string.action_update_server);
@@ -220,15 +221,17 @@ public class ServerListFragment extends Fragment {
 	public boolean onContextItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case ID_UPDATE: {
-			AdapterContextMenuInfo info = (AdapterContextMenuInfo) item
+			ExpandableListContextMenuInfo info = (ExpandableListContextMenuInfo) item
 					.getMenuInfo();
-			update(servers.get(info.position));
+			update(servers.get(ExpandableListView
+					.getPackedPositionGroup(info.packedPosition)));
 			return true;
 		}
 		case ID_REMOVE: {
-			AdapterContextMenuInfo info = (AdapterContextMenuInfo) item
+			ExpandableListContextMenuInfo info = (ExpandableListContextMenuInfo) item
 					.getMenuInfo();
-			remove(servers.get(info.position));
+			remove(servers.get(ExpandableListView
+					.getPackedPositionGroup(info.packedPosition)));
 			return true;
 		}
 		default:
