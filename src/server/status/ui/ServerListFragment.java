@@ -21,15 +21,14 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ContextMenu.ContextMenuInfo;
-import android.widget.AdapterView;
 import android.widget.ExpandableListView;
 import android.widget.ExpandableListView.ExpandableListContextMenuInfo;
 import android.widget.Toast;
-import android.widget.AdapterView.OnItemClickListener;
 
 public class ServerListFragment extends Fragment {
 	private static final int ID_UPDATE = 1;
-	private static final int ID_REMOVE = 2;
+	private static final int ID_EDIT = 2;
+	private static final int ID_REMOVE = 3;
 
 	private ServerAdapter serverAdapter;
 	private ArrayList<Server> servers = new ArrayList<Server>();
@@ -124,6 +123,8 @@ public class ServerListFragment extends Fragment {
 	 *            Index of the server to start
 	 */
 	private void update(final Server server) {
+		// TODO Block if already running
+		// TODO Show progress bar when running
 		final Context context = getActivity().getApplicationContext();
 		new Thread(new Runnable() {
 			@Override
@@ -133,6 +134,10 @@ public class ServerListFragment extends Fragment {
 				server.check(settings, context);
 			}
 		}).start();
+	}
+
+	private void edit(Server server) {
+		// TODO Edit activity
 	}
 
 	private void remove(final Server server) {
@@ -188,13 +193,6 @@ public class ServerListFragment extends Fragment {
 				.findViewById(R.id.listViewServers);
 		listViewServers.setEmptyView(view.findViewById(R.id.textViewEmptyList));
 		listViewServers.setAdapter(serverAdapter);
-		listViewServers.setOnItemClickListener(new OnItemClickListener() {
-			@Override
-			public void onItemClick(AdapterView<?> parent, View view,
-					int position, long id) {
-				// TODO Show details/edit
-			}
-		});
 		// Long click menu
 		registerForContextMenu(listViewServers);
 		return view;
@@ -210,6 +208,7 @@ public class ServerListFragment extends Fragment {
 			menu.setHeaderTitle(server.getHost());
 			menu.add(Menu.NONE, ID_UPDATE, Menu.NONE,
 					R.string.action_update_server);
+			menu.add(Menu.NONE, ID_EDIT, Menu.NONE, R.string.action_edit_server);
 			menu.add(Menu.NONE, ID_REMOVE, Menu.NONE,
 					R.string.action_remove_server);
 		} else {
@@ -224,6 +223,13 @@ public class ServerListFragment extends Fragment {
 			ExpandableListContextMenuInfo info = (ExpandableListContextMenuInfo) item
 					.getMenuInfo();
 			update(servers.get(ExpandableListView
+					.getPackedPositionGroup(info.packedPosition)));
+			return true;
+		}
+		case ID_EDIT: {
+			ExpandableListContextMenuInfo info = (ExpandableListContextMenuInfo) item
+					.getMenuInfo();
+			edit(servers.get(ExpandableListView
 					.getPackedPositionGroup(info.packedPosition)));
 			return true;
 		}
