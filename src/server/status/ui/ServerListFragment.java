@@ -125,6 +125,7 @@ public class ServerListFragment extends Fragment {
 	private void update(final Server server) {
 		// TODO Block if already running
 		// TODO Show progress bar when running
+		// TODO Update should run in a service?
 		final Context context = getActivity().getApplicationContext();
 		new Thread(new Runnable() {
 			@Override

@@ -11,6 +11,7 @@ public class Settings {
 	public static final int BOOTUP_DELAY = 30000; // 30s
 	public static final int ENABLE_DELAY = 100; // ms
 	private boolean enabled = true;
+	private boolean notificationSound = true;
 	private long intervalMS = 600000; // 10min
 	private int timeoutMS = 5000;
 	private int timeout = 5;
@@ -20,6 +21,8 @@ public class Settings {
 		SharedPreferences sharedPref = PreferenceManager
 				.getDefaultSharedPreferences(context);
 		enabled = sharedPref.getBoolean(SettingsActivity.PREF_ENABLED, true);
+		notificationSound = sharedPref.getBoolean(SettingsActivity.PREF_SOUND,
+				true);
 		try {
 			intervalMS = ((long) Integer.parseInt(sharedPref.getString(
 					SettingsActivity.PREF_INTERVAL, "10"))) * 60000;
@@ -48,6 +51,10 @@ public class Settings {
 
 	public boolean isEnabled() {
 		return enabled;
+	}
+
+	public boolean notificationSound() {
+		return notificationSound;
 	}
 
 	public long getIntervalMS() {

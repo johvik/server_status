@@ -9,6 +9,7 @@ import android.preference.PreferenceActivity;
 public class SettingsActivity extends PreferenceActivity implements
 		OnSharedPreferenceChangeListener {
 	public static final String PREF_ENABLED = "pref_enabled";
+	public static final String PREF_SOUND = "pref_sound";
 	public static final String PREF_INTERVAL = "pref_interval";
 	public static final String PREF_TIMEOUT = "pref_timeout";
 

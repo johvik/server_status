@@ -14,6 +14,7 @@
     <string name="action_remove_server">Remove</string>
     <string name="pref_enabled">Enabled</string>
     <string name="pref_enabled_summ">Run status updates on a schedule</string>
+    <string name="pref_sound">Notification sound</string>
     <string name="pref_interval">Interval</string>
     <string name="pref_interval_summ">%1$s minutes between updates</string>
     <string name="pref_timeout">Timeout</string>
@@ -23,5 +24,7 @@
     <string name="empty_server_list">No servers added =(</string>
     <string name="server_add_fail">Failed to add server</string>
     <string name="server_remove_fail">Failed to remove server</string>
+    <string name="notification_title_fail">%1$s</string>
+    <string name="notification_text_fail">%1$s/%2$s checks passed</string>
 
 </resources>

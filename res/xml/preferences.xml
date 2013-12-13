@@ -6,6 +6,10 @@
         android:key="pref_enabled"
         android:summary="@string/pref_enabled_summ"
         android:title="@string/pref_enabled" />
+    <CheckBoxPreference
+        android:defaultValue="true"
+        android:key="pref_sound"
+        android:title="@string/pref_sound" />
 
     <EditTextPreference
         android:defaultValue="@string/ten"
