@@ -74,7 +74,6 @@ public class ServerListFragment extends Fragment {
 							}
 							// Add new
 							addServer(server);
-							serverAdapter.notifyDataSetChanged();
 						}
 					});
 				}
