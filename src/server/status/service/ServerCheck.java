@@ -11,10 +11,13 @@ import android.content.Intent;
 public class ServerCheck extends IntentService {
 	public ServerCheck() {
 		super("ServerCheck");
+		// Restart if it is killed while running
+		setIntentRedelivery(true);
 	}
 
 	@Override
 	protected void onHandleIntent(Intent intent) {
+		// TODO Handle each server in individual intents?
 		Context context = getApplicationContext();
 		Settings settings = new Settings();
 		settings.loadSettings(context);
