@@ -5,9 +5,9 @@
         android:orderInCategory="100"
         android:title="@string/action_server_update_now"/>
     <item
-        android:id="@+id/action_server_edit"
+        android:id="@+id/action_server_change_host"
         android:orderInCategory="101"
-        android:title="@string/action_server_edit"/>
+        android:title="@string/action_server_change_host"/>
     <item
         android:id="@+id/action_server_add_checker"
         android:orderInCategory="102"

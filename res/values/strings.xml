@@ -10,7 +10,7 @@
     <string name="action_add_server">Add server</string>
     <string name="action_server_add_checker">Add checker</string>
     <string name="action_server_update_now">Update now</string>
-    <string name="action_server_edit">Edit</string>
+    <string name="action_server_change_host">Change host</string>
     <string name="action_server_remove">Remove</string>
     <string name="action_settings">Settings</string>
     <string name="checker_http">Http</string>

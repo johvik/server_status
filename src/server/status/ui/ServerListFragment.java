@@ -200,7 +200,7 @@ public class ServerListFragment extends Fragment implements ServerHostListener {
 		}
 	}
 
-	private void edit(Server server) {
+	private void changeHost(Server server) {
 		this.editServer = server;
 		ServerHostDialog dialog = new ServerHostDialog();
 		Bundle args = new Bundle();
@@ -297,10 +297,10 @@ public class ServerListFragment extends Fragment implements ServerHostListener {
 					.getPackedPositionGroup(info.packedPosition)));
 			return true;
 		}
-		case R.id.action_server_edit: {
+		case R.id.action_server_change_host: {
 			ExpandableListContextMenuInfo info = (ExpandableListContextMenuInfo) item
 					.getMenuInfo();
-			edit(servers.get(ExpandableListView
+			changeHost(servers.get(ExpandableListView
 					.getPackedPositionGroup(info.packedPosition)));
 			return true;
 		}
