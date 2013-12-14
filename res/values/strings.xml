@@ -4,12 +4,11 @@
     <string name="app_name">Server Status</string>
     <string name="ten">10</string>
     <string name="five_thousand">5000</string>
-    <string name="button_save">Save</string>
     <string name="button_ok">OK</string>
     <string name="button_cancel">Cancel</string>
     <string name="server_remove_confirm">Remove %1$s?</string>
     <string name="action_add_server">Add server</string>
-    <string name="action_add_checker">Add checker</string>
+    <string name="action_server_add_checker">Add checker</string>
     <string name="action_server_update_now">Update now</string>
     <string name="action_server_edit">Edit</string>
     <string name="action_server_remove">Remove</string>
@@ -27,12 +26,18 @@
     <string name="pref_timeout">Timeout</string>
     <string name="pref_timeout_summ">Connections timeout after %1$s milliseconds</string>
     <string name="never">Never</string>
-    <string name="empty_checker_list">No checkers added =(</string>
+    <string name="empty_checker_list">No checkers added =(\nUse "Add checker" in the menu.</string>
     <string name="empty_server_list">No servers added =(</string>
+    <string name="empty_host">&lt;Blank&gt;</string>
     <string name="server_add_fail">Failed to add server</string>
     <string name="server_remove_fail">Failed to remove server</string>
+    <string name="server_save_fail">Failed to save server</string>
+    <string name="server_host_change">Change host</string>
     <string name="notification_title_fail">%1$s</string>
     <string name="notification_text_fail">%1$s/%2$s checks passed</string>
+    <string name="hint_host_change">Hostname or IP</string>
+    <string name="hint_port">Port</string>
+    <string name="hint_response_code">Response code</string>
 
     <string-array name="checkers_array">
         <item>@string/checker_http</item>

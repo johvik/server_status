@@ -29,6 +29,10 @@ public class Http extends Checker {
 		this.responseCode = responseCode;
 	}
 
+	public int getPort() {
+		return port;
+	}
+
 	@Override
 	public Status check(String host, Settings settings) {
 		try {

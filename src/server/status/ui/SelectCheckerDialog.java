@@ -31,7 +31,7 @@ public class SelectCheckerDialog extends DialogFragment {
 	@Override
 	public Dialog onCreateDialog(Bundle savedInstanceState) {
 		AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-		builder.setTitle(getString(R.string.action_add_checker));
+		builder.setTitle(getString(R.string.action_server_add_checker));
 		builder.setItems(R.array.checkers_array, new OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {

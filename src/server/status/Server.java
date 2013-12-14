@@ -12,6 +12,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v4.app.NotificationCompat;
+import android.util.Pair;
 
 public class Server implements Comparable<Server> {
 	public static final String INTENT_ID = "sid";
@@ -67,6 +68,10 @@ public class Server implements Comparable<Server> {
 		this.id = id;
 	}
 
+	public void setHost(String host) {
+		this.host = host;
+	}
+
 	public boolean isCheckRunning() {
 		return checkRunning;
 	}
@@ -78,6 +83,10 @@ public class Server implements Comparable<Server> {
 	public void add(Checker checker, Status status) {
 		checkers.add(checker);
 		results.add(status);
+	}
+
+	public Pair<Checker, Status> get(int index) {
+		return Pair.create(checkers.get(index), results.get(index));
 	}
 
 	public void clear() {
@@ -126,6 +135,10 @@ public class Server implements Comparable<Server> {
 			// Something failed, show notification
 			Intent intent = new Intent(context, MainActivity.class);
 			intent.putExtra(INTENT_ID, id);
+			String host = this.host;
+			if (host.trim().length() == 0) {
+				host = context.getString(R.string.empty_host);
+			}
 			PendingIntent pendingIntent = PendingIntent.getActivity(context, 0,
 					intent, PendingIntent.FLAG_UPDATE_CURRENT);
 			NotificationManager notificationManager = (NotificationManager) context

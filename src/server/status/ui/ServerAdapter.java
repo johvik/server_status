@@ -37,10 +37,7 @@ public class ServerAdapter extends BaseExpandableListAdapter {
 	@Override
 	public Object getChild(int groupPosition, int childPosition) {
 		Server server = list.get(groupPosition);
-		ArrayList<Checker> checkers = server.getCheckers();
-		ArrayList<Status> results = server.getResults();
-		return Pair.create(checkers.get(childPosition),
-				results.get(childPosition));
+		return server.get(childPosition);
 	}
 
 	@Override
@@ -166,7 +163,11 @@ public class ServerAdapter extends BaseExpandableListAdapter {
 		}
 
 		Server server = list.get(groupPosition);
-		text1.setText(server.getHost());
+		String host = server.getHost();
+		if (host.trim().length() == 0) {
+			host = context.getString(R.string.empty_host);
+		}
+		text1.setText(host);
 		if (server.hasFail()) {
 			text1.setTextColor(COLOR_FAIL);
 		} else if (server.hasInconclusive()) {
@@ -190,6 +191,6 @@ public class ServerAdapter extends BaseExpandableListAdapter {
 
 	@Override
 	public boolean isChildSelectable(int groupPosition, int childPosition) {
-		return false;
+		return true;
 	}
 }

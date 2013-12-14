@@ -6,6 +6,7 @@ import server.status.check.Ping;
 import server.status.check.Socket;
 import server.status.db.ServerDbHelper;
 import server.status.service.Starter;
+import server.status.ui.ServerHostDialog.ServerHostListener;
 import server.status.ui.ServerListFragment;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -18,7 +19,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
-public class MainActivity extends FragmentActivity {
+public class MainActivity extends FragmentActivity implements
+		ServerHostListener {
 	private ServerListFragment serverListFragment;
 	private BroadcastReceiver receiver = new BroadcastReceiver() {
 		@Override
@@ -94,5 +96,10 @@ public class MainActivity extends FragmentActivity {
 	private void showSettings() {
 		Intent intent = new Intent(this, SettingsActivity.class);
 		startActivity(intent);
+	}
+
+	@Override
+	public void onHostChange(String host) {
+		serverListFragment.onHostChange(host);
 	}
 }

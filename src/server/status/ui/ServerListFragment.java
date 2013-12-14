@@ -3,16 +3,15 @@ package server.status.ui;
 import java.util.ArrayList;
 import java.util.Collections;
 
-import server.status.EditActivity;
 import server.status.R;
 import server.status.Server;
 import server.status.Settings;
 import server.status.db.ServerDbHelper;
+import server.status.ui.ServerHostDialog.ServerHostListener;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.DialogInterface.OnClickListener;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -26,7 +25,7 @@ import android.widget.ExpandableListView;
 import android.widget.ExpandableListView.ExpandableListContextMenuInfo;
 import android.widget.Toast;
 
-public class ServerListFragment extends Fragment {
+public class ServerListFragment extends Fragment implements ServerHostListener {
 	private static final String BUNDLE_EXPANDED = "exp";
 
 	private ExpandableListView listViewServers = null;
@@ -34,6 +33,7 @@ public class ServerListFragment extends Fragment {
 	private ArrayList<Server> servers = new ArrayList<Server>();
 	private ArrayList<Integer> expanded = new ArrayList<Integer>();
 	private long expandServerId = -1;
+	private Server editServer = null;
 
 	@Override
 	public void onAttach(Activity activity) {
@@ -201,10 +201,16 @@ public class ServerListFragment extends Fragment {
 	}
 
 	private void edit(Server server) {
-		Intent intent = new Intent(getActivity().getApplicationContext(),
-				EditActivity.class);
-		intent.putExtra(EditActivity.INTENT_ID, server.getId());
-		startActivity(intent);
+		this.editServer = server;
+		ServerHostDialog dialog = new ServerHostDialog();
+		Bundle args = new Bundle();
+		args.putString(ServerHostDialog.INTENT_HOST, server.getHost());
+		dialog.setArguments(args);
+		dialog.show(getFragmentManager(), "ServerHostDialog");
+	}
+
+	private void addChecker(Server server) {
+		// TODO
 	}
 
 	private void remove(final Server server) {
@@ -282,6 +288,7 @@ public class ServerListFragment extends Fragment {
 
 	@Override
 	public boolean onContextItemSelected(MenuItem item) {
+		// TODO Handle click on childs
 		switch (item.getItemId()) {
 		case R.id.action_server_update_now: {
 			ExpandableListContextMenuInfo info = (ExpandableListContextMenuInfo) item
@@ -297,6 +304,13 @@ public class ServerListFragment extends Fragment {
 					.getPackedPositionGroup(info.packedPosition)));
 			return true;
 		}
+		case R.id.action_server_add_checker: {
+			ExpandableListContextMenuInfo info = (ExpandableListContextMenuInfo) item
+					.getMenuInfo();
+			addChecker(servers.get(ExpandableListView
+					.getPackedPositionGroup(info.packedPosition)));
+			return true;
+		}
 		case R.id.action_server_remove: {
 			ExpandableListContextMenuInfo info = (ExpandableListContextMenuInfo) item
 					.getMenuInfo();
@@ -306,6 +320,34 @@ public class ServerListFragment extends Fragment {
 		}
 		default:
 			return super.onContextItemSelected(item);
+		}
+	}
+
+	@Override
+	public void onHostChange(String host) {
+		if (editServer != null) {
+			editServer.setHost(host);
+			final Activity activity = getActivity();
+			new Thread(new Runnable() {
+				@Override
+				public void run() {
+					final boolean updated = ServerDbHelper.getInstance(
+							activity.getApplicationContext())
+							.update(editServer);
+					activity.runOnUiThread(new Runnable() {
+						@Override
+						public void run() {
+							if (!updated) {
+								Toast.makeText(activity,
+										R.string.server_save_fail,
+										Toast.LENGTH_SHORT).show();
+							}
+							serverAdapter.notifyDataSetChanged();
+							editServer = null;
+						}
+					});
+				}
+			}).start();
 		}
 	}
 }

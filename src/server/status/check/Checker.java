@@ -61,4 +61,23 @@ public abstract class Checker {
 			return null;
 		}
 	}
+
+	/**
+	 * 
+	 * @param index
+	 *            Position in the string array
+	 * @return The translated checker
+	 */
+	public static Checker fromIndex(int index) {
+		switch (index) {
+		case 0:
+			return new Http(80, 200);
+		case 1:
+			return new Https(443, 200, false);
+		case 2:
+			return new Ping();
+		default:
+			return new Socket(80);
+		}
+	}
 }
