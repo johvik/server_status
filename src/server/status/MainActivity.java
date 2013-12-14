@@ -24,8 +24,9 @@ public class MainActivity extends FragmentActivity {
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			long id = intent.getLongExtra(Server.INTENT_ID, -1);
+			boolean done = intent.getBooleanExtra(Server.INTENT_DONE, false);
 			if (id != -1) {
-				serverListFragment.refresh(id);
+				serverListFragment.refresh(id, done);
 			}
 		}
 	};

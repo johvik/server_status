@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import server.status.R;
 import server.status.Server;
@@ -138,9 +139,11 @@ public class ServerAdapter extends BaseExpandableListAdapter {
 
 	private static class GroupViewHolder {
 		public final TextView text1;
+		public final ProgressBar progressBar1;
 
-		public GroupViewHolder(TextView text1) {
+		public GroupViewHolder(TextView text1, ProgressBar progressBar1) {
 			this.text1 = text1;
+			this.progressBar1 = progressBar1;
 		}
 	}
 
@@ -148,15 +151,18 @@ public class ServerAdapter extends BaseExpandableListAdapter {
 	public View getGroupView(int groupPosition, boolean isExpanded,
 			View convertView, ViewGroup parent) {
 		TextView text1;
+		ProgressBar progressBar1;
 		if (convertView == null) {
 			convertView = LayoutInflater.from(context).inflate(
-					android.R.layout.simple_expandable_list_item_1, parent,
-					false);
-			text1 = (TextView) convertView.findViewById(android.R.id.text1);
-			convertView.setTag(new GroupViewHolder(text1));
+					R.layout.list_item_server, parent, false);
+			text1 = (TextView) convertView.findViewById(R.id.text1);
+			progressBar1 = (ProgressBar) convertView
+					.findViewById(R.id.progressBar1);
+			convertView.setTag(new GroupViewHolder(text1, progressBar1));
 		} else {
 			GroupViewHolder viewHolder = (GroupViewHolder) convertView.getTag();
 			text1 = viewHolder.text1;
+			progressBar1 = viewHolder.progressBar1;
 		}
 
 		Server server = list.get(groupPosition);
@@ -167,6 +173,12 @@ public class ServerAdapter extends BaseExpandableListAdapter {
 			text1.setTextColor(COLOR_INCONCLUSIVE);
 		} else {
 			text1.setTextColor(COLOR_PASS);
+		}
+		// Hide progress bar when done
+		if (server.isDone()) {
+			progressBar1.setVisibility(View.INVISIBLE);
+		} else {
+			progressBar1.setVisibility(View.VISIBLE);
 		}
 		return convertView;
 	}

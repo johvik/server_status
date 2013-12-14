@@ -45,8 +45,10 @@ public class ServerListFragment extends Fragment {
 	 * Refresh server by id
 	 * 
 	 * @param serverId
+	 * @param done
+	 *            Indicates if it was the last update for the server
 	 */
-	public void refresh(final long serverId) {
+	public void refresh(final long serverId, final boolean done) {
 		final Activity activity = getActivity();
 		final Context context = activity.getApplicationContext();
 		new Thread(new Runnable() {
@@ -55,6 +57,8 @@ public class ServerListFragment extends Fragment {
 				final Server server = ServerDbHelper.getInstance(context).load(
 						serverId);
 				if (server != null) {
+					// Set done flag
+					server.setDone(done);
 					Server found = null;
 					// Find old by id
 					for (Server s : servers) {
@@ -123,18 +127,22 @@ public class ServerListFragment extends Fragment {
 	 *            Index of the server to start
 	 */
 	private void update(final Server server) {
-		// TODO Block if already running
-		// TODO Show progress bar when running
-		// TODO Update should run in a service?
 		final Context context = getActivity().getApplicationContext();
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				Settings settings = new Settings();
-				settings.loadSettings(context);
-				server.check(settings, context);
-			}
-		}).start();
+		if (server.isDone()) {
+			// TODO Done flag is unstable if rotated for example. Save in db?
+			// TODO Update should run in a service?
+			new Thread(new Runnable() {
+				@Override
+				public void run() {
+					Settings settings = new Settings();
+					settings.loadSettings(context);
+					server.check(settings, context);
+				}
+			}).start();
+		} else {
+			Toast.makeText(context, getString(R.string.update_running),
+					Toast.LENGTH_SHORT).show();
+		}
 	}
 
 	private void edit(Server server) {

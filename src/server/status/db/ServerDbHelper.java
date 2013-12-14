@@ -329,6 +329,8 @@ public class ServerDbHelper extends SQLiteOpenHelper {
 		}
 		cursor.close();
 	}
+	
+	// TODO Clean up results if server gets removed while update is running
 
 	@Override
 	public void onCreate(SQLiteDatabase db) {

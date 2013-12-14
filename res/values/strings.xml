@@ -10,6 +10,7 @@
     <string name="action_add_server">Add server</string>
     <string name="action_settings">Settings</string>
     <string name="action_update_server">Update now</string>
+    <string name="update_running">Update is already running</string>
     <string name="action_edit_server">Edit</string>
     <string name="action_remove_server">Remove</string>
     <string name="pref_enabled">Enabled</string>
