@@ -35,10 +35,10 @@
     <string name="notification_text_fail">%1$s/%2$s checks passed</string>
 
     <string-array name="checkers_array">
-        <item>Http</item>
-        <item>Https</item>
-        <item>Ping</item>
-        <item>Socket</item>
+        <item>@string/checker_http</item>
+        <item>@string/checker_https</item>
+        <item>@string/checker_ping</item>
+        <item>@string/checker_socket</item>
     </string-array>
 
 </resources>

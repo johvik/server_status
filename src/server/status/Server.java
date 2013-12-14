@@ -125,6 +125,7 @@ public class Server implements Comparable<Server> {
 		if (count < size) {
 			// Something failed, show notification
 			Intent intent = new Intent(context, MainActivity.class);
+			intent.putExtra(INTENT_ID, id);
 			PendingIntent pendingIntent = PendingIntent.getActivity(context, 0,
 					intent, PendingIntent.FLAG_UPDATE_CURRENT);
 			NotificationManager notificationManager = (NotificationManager) context

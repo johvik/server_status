@@ -39,6 +39,10 @@ public class MainActivity extends FragmentActivity {
 				.findFragmentById(R.id.fragmentServerList);
 		// Make sure it is started if enabled
 		Starter.start(getApplicationContext(), Settings.ENABLE_DELAY);
+
+		long id = getIntent().getLongExtra(Server.INTENT_ID, -1);
+		// Expand id
+		serverListFragment.expandServer(id);
 	}
 
 	@Override

@@ -33,6 +33,7 @@ public class ServerListFragment extends Fragment {
 	private ServerAdapter serverAdapter;
 	private ArrayList<Server> servers = new ArrayList<Server>();
 	private ArrayList<Integer> expanded = new ArrayList<Integer>();
+	private long expandServerId = -1;
 
 	@Override
 	public void onAttach(Activity activity) {
@@ -68,6 +69,15 @@ public class ServerListFragment extends Fragment {
 			outState.putIntegerArrayList(BUNDLE_EXPANDED, expanded);
 		}
 		super.onSaveInstanceState(outState);
+	}
+
+	/**
+	 * Used after refreshAll
+	 * 
+	 * @param id
+	 */
+	public void expandServer(long id) {
+		expandServerId = id;
 	}
 
 	/**
@@ -134,6 +144,17 @@ public class ServerListFragment extends Fragment {
 							for (Integer i : expanded) {
 								if (i < size) {
 									listViewServers.expandGroup(i);
+								}
+							}
+							// Extra expand
+							if (expandServerId != -1) {
+								for (int i = 0, j = servers.size(); i < j; i++) {
+									if (servers.get(i).getId() == expandServerId) {
+										if (i < size) {
+											listViewServers.expandGroup(i);
+											break;
+										}
+									}
 								}
 							}
 						}
