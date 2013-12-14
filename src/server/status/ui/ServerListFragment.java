@@ -29,16 +29,47 @@ public class ServerListFragment extends Fragment {
 	private static final int ID_UPDATE = 1;
 	private static final int ID_EDIT = 2;
 	private static final int ID_REMOVE = 3;
+	private static final String BUNDLE_EXPANDED = "exp";
 
+	private ExpandableListView listViewServers = null;
 	private ServerAdapter serverAdapter;
 	private ArrayList<Server> servers = new ArrayList<Server>();
+	private ArrayList<Integer> expanded = new ArrayList<Integer>();
 
 	@Override
 	public void onAttach(Activity activity) {
 		super.onAttach(activity);
 		Context context = activity.getApplicationContext();
 		serverAdapter = new ServerAdapter(context, servers);
+	}
+
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		// Load expanded
+		if (savedInstanceState != null) {
+			ArrayList<Integer> expanded = savedInstanceState
+					.getIntegerArrayList(BUNDLE_EXPANDED);
+			if (expanded != null) {
+				this.expanded.addAll(expanded);
+			}
+		}
 		refreshAll();
+		super.onCreate(savedInstanceState);
+	}
+
+	@Override
+	public void onSaveInstanceState(Bundle outState) {
+		if (listViewServers != null) {
+			// Save the ones that are expanded
+			ArrayList<Integer> expanded = new ArrayList<Integer>();
+			for (int i = 0, j = listViewServers.getCount(); i < j; i++) {
+				if (listViewServers.isGroupExpanded(i)) {
+					expanded.add(i);
+				}
+			}
+			outState.putIntegerArrayList(BUNDLE_EXPANDED, expanded);
+		}
+		super.onSaveInstanceState(outState);
 	}
 
 	/**
@@ -97,11 +128,21 @@ public class ServerListFragment extends Fragment {
 				settings.loadServers(context);
 				final ArrayList<Server> list = settings.getServers();
 				Collections.sort(list);
+
 				activity.runOnUiThread(new Runnable() {
 					@Override
 					public void run() {
 						servers.clear();
 						servers.addAll(list);
+						// Expand items
+						if (listViewServers != null) {
+							int size = servers.size();
+							for (Integer i : expanded) {
+								if (i < size) {
+									listViewServers.expandGroup(i);
+								}
+							}
+						}
 						serverAdapter.notifyDataSetChanged();
 					}
 				});
@@ -198,7 +239,7 @@ public class ServerListFragment extends Fragment {
 			Bundle savedInstanceState) {
 		View view = inflater.inflate(R.layout.fragment_server_list, container,
 				false);
-		ExpandableListView listViewServers = (ExpandableListView) view
+		listViewServers = (ExpandableListView) view
 				.findViewById(R.id.listViewServers);
 		listViewServers.setEmptyView(view.findViewById(R.id.textViewEmptyList));
 		listViewServers.setAdapter(serverAdapter);
