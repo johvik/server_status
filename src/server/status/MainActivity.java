@@ -24,9 +24,8 @@ public class MainActivity extends FragmentActivity {
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			long id = intent.getLongExtra(Server.INTENT_ID, -1);
-			boolean done = intent.getBooleanExtra(Server.INTENT_DONE, false);
 			if (id != -1) {
-				serverListFragment.refresh(id, done);
+				serverListFragment.refresh(id);
 			}
 		}
 	};
@@ -71,7 +70,7 @@ public class MainActivity extends FragmentActivity {
 			server.addChecker(new Https(8080, 200, true));
 			server.addChecker(new Ping());
 			server.addChecker(new Socket(50022));
-			boolean saved = ServerDbHelper.getInstance(context).save(server);
+			boolean saved = ServerDbHelper.getInstance(context).insert(server);
 			if (saved) {
 				serverListFragment.addServer(server);
 			} else {

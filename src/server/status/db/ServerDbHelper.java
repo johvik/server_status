@@ -18,11 +18,13 @@ public class ServerDbHelper extends SQLiteOpenHelper {
 	private interface ServerEntry extends BaseColumns {
 		public static final String TABLE_NAME = "servers";
 		public static final String COLUMN_NAME_HOST = "host";
+		public static final String COLUMN_NAME_CHECK_RUNNING = "check_running";
 
 		public static final String SQL_CREATE_ENTRIES = "CREATE TABLE "
 				+ TABLE_NAME + " (" + _ID
 				+ " INTEGER PRIMARY KEY AUTOINCREMENT, " + COLUMN_NAME_HOST
-				+ " TEXT NOT NULL)";
+				+ " TEXT NOT NULL, " + COLUMN_NAME_CHECK_RUNNING
+				+ " INTEGER NOT NULL)";
 		public static final String SQL_DELETE_ENTRIES = "DROP TABLE IF EXISTS "
 				+ TABLE_NAME;
 	}
@@ -69,25 +71,14 @@ public class ServerDbHelper extends SQLiteOpenHelper {
 		return instance;
 	}
 
-	/**
-	 * Updates or inserts depending on the value of server.getId
-	 * 
-	 * @param server
-	 * @return True on success
-	 */
-	public boolean save(Server server) {
-		if (server.getId() == -1) {
-			return insert(server);
-		}
-		return update(server);
-	}
-
-	private synchronized boolean insert(Server server) {
+	public synchronized boolean insert(Server server) {
 		SQLiteDatabase db = instance.getWritableDatabase();
 		db.beginTransaction();
 		try {
 			ContentValues values = new ContentValues();
 			values.put(ServerEntry.COLUMN_NAME_HOST, server.getHost());
+			values.put(ServerEntry.COLUMN_NAME_CHECK_RUNNING,
+					server.isCheckRunning() ? 1 : 0);
 
 			long id = db.insert(ServerEntry.TABLE_NAME, null, values);
 			server.setId(id);
@@ -105,12 +96,14 @@ public class ServerDbHelper extends SQLiteOpenHelper {
 		}
 	}
 
-	private synchronized boolean update(Server server) {
+	public synchronized boolean update(Server server) {
 		SQLiteDatabase db = instance.getWritableDatabase();
 		db.beginTransaction();
 		try {
 			ContentValues values = new ContentValues();
 			values.put(ServerEntry.COLUMN_NAME_HOST, server.getHost());
+			values.put(ServerEntry.COLUMN_NAME_CHECK_RUNNING,
+					server.isCheckRunning() ? 1 : 0);
 
 			int count = db.update(ServerEntry.TABLE_NAME, values,
 					ServerEntry._ID + "=?",
@@ -222,21 +215,30 @@ public class ServerDbHelper extends SQLiteOpenHelper {
 		SQLiteDatabase db = instance.getWritableDatabase();
 		db.beginTransaction();
 		try {
-			ContentValues values = new ContentValues();
-			values.put(CheckerStatusEntry.COLUMN_NAME_SERVER, server.getId());
-			values.put(CheckerStatusEntry.COLUMN_NAME_TYPE, checker.getType()
-					.ordinal());
-			values.put(CheckerStatusEntry.COLUMN_NAME_ARGS, checker.getArgs());
-			values.put(CheckerStatusEntry.COLUMN_NAME_RESULT,
-					status.result.ordinal());
-			values.put(CheckerStatusEntry.COLUMN_NAME_REASON, status.reason);
-			values.put(CheckerStatusEntry.COLUMN_NAME_TIME, status.time);
+			// Update running state
+			ContentValues values1 = new ContentValues();
+			values1.put(ServerEntry.COLUMN_NAME_CHECK_RUNNING,
+					server.isCheckRunning() ? 1 : 0);
+			int count1 = db.update(ServerEntry.TABLE_NAME, values1,
+					ServerEntry._ID + "=?",
+					new String[] { String.valueOf(server.getId()) });
 
-			int count = db.update(CheckerStatusEntry.TABLE_NAME, values,
+			// Update results
+			ContentValues values2 = new ContentValues();
+			values2.put(CheckerStatusEntry.COLUMN_NAME_SERVER, server.getId());
+			values2.put(CheckerStatusEntry.COLUMN_NAME_TYPE, checker.getType()
+					.ordinal());
+			values2.put(CheckerStatusEntry.COLUMN_NAME_ARGS, checker.getArgs());
+			values2.put(CheckerStatusEntry.COLUMN_NAME_RESULT,
+					status.result.ordinal());
+			values2.put(CheckerStatusEntry.COLUMN_NAME_REASON, status.reason);
+			values2.put(CheckerStatusEntry.COLUMN_NAME_TIME, status.time);
+
+			int count2 = db.update(CheckerStatusEntry.TABLE_NAME, values2,
 					CheckerStatusEntry._ID + "=?",
 					new String[] { String.valueOf(checker.getId()) });
 
-			if (1 == count) {
+			if (1 == count1 && 1 == count2) {
 				db.setTransactionSuccessful();
 				return true;
 			}
@@ -258,14 +260,16 @@ public class ServerDbHelper extends SQLiteOpenHelper {
 		Server res = null;
 		SQLiteDatabase db = instance.getReadableDatabase();
 		Cursor cursor = db.query(ServerEntry.TABLE_NAME, new String[] {
-				ServerEntry._ID, ServerEntry.COLUMN_NAME_HOST },
+				ServerEntry._ID, ServerEntry.COLUMN_NAME_HOST,
+				ServerEntry.COLUMN_NAME_CHECK_RUNNING },
 				ServerEntry._ID + "=?",
 				new String[] { String.valueOf(serverId) }, null, null, null);
 		if (cursor.moveToFirst()) {
 			long id = cursor.getLong(0);
 			String host = cursor.getString(1);
+			boolean checkRunning = cursor.getInt(2) == 1;
 
-			res = new Server(id, host);
+			res = new Server(id, host, checkRunning);
 			loadCheckerStatus(res, db);
 		}
 		cursor.close();
@@ -282,15 +286,17 @@ public class ServerDbHelper extends SQLiteOpenHelper {
 		ArrayList<Server> res = new ArrayList<Server>();
 		SQLiteDatabase db = instance.getReadableDatabase();
 		Cursor cursor = db.query(ServerEntry.TABLE_NAME, new String[] {
-				ServerEntry._ID, ServerEntry.COLUMN_NAME_HOST }, null, null,
-				null, null, ServerEntry._ID + " ASC");
+				ServerEntry._ID, ServerEntry.COLUMN_NAME_HOST,
+				ServerEntry.COLUMN_NAME_CHECK_RUNNING }, null, null, null,
+				null, ServerEntry._ID + " ASC");
 
 		cursor.moveToFirst();
 		while (!cursor.isAfterLast()) {
 			long id = cursor.getLong(0);
 			String host = cursor.getString(1);
+			boolean checkRunning = cursor.getInt(2) == 1;
 
-			Server server = new Server(id, host);
+			Server server = new Server(id, host, checkRunning);
 			loadCheckerStatus(server, db);
 			res.add(server);
 			cursor.moveToNext();
@@ -329,7 +335,7 @@ public class ServerDbHelper extends SQLiteOpenHelper {
 		}
 		cursor.close();
 	}
-	
+
 	// TODO Clean up results if server gets removed while update is running
 
 	@Override

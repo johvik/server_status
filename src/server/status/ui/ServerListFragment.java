@@ -76,10 +76,8 @@ public class ServerListFragment extends Fragment {
 	 * Refresh server by id
 	 * 
 	 * @param serverId
-	 * @param done
-	 *            Indicates if it was the last update for the server
 	 */
-	public void refresh(final long serverId, final boolean done) {
+	public void refresh(final long serverId) {
 		final Activity activity = getActivity();
 		final Context context = activity.getApplicationContext();
 		new Thread(new Runnable() {
@@ -88,8 +86,6 @@ public class ServerListFragment extends Fragment {
 				final Server server = ServerDbHelper.getInstance(context).load(
 						serverId);
 				if (server != null) {
-					// Set done flag
-					server.setDone(done);
 					Server found = null;
 					// Find old by id
 					for (Server s : servers) {
@@ -169,8 +165,7 @@ public class ServerListFragment extends Fragment {
 	 */
 	private void update(final Server server) {
 		final Context context = getActivity().getApplicationContext();
-		if (server.isDone()) {
-			// TODO Done flag is unstable if rotated for example. Save in db?
+		if (!server.isCheckRunning()) {
 			// TODO Update should run in a service?
 			new Thread(new Runnable() {
 				@Override

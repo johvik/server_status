@@ -175,10 +175,10 @@ public class ServerAdapter extends BaseExpandableListAdapter {
 			text1.setTextColor(COLOR_PASS);
 		}
 		// Hide progress bar when done
-		if (server.isDone()) {
-			progressBar1.setVisibility(View.INVISIBLE);
-		} else {
+		if (server.isCheckRunning()) {
 			progressBar1.setVisibility(View.VISIBLE);
+		} else {
+			progressBar1.setVisibility(View.INVISIBLE);
 		}
 		return convertView;
 	}

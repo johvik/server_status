@@ -15,22 +15,22 @@ import android.support.v4.app.NotificationCompat;
 
 public class Server implements Comparable<Server> {
 	public static final String INTENT_ID = "sid";
-	public static final String INTENT_DONE = "done";
 	public static final String BROADCAST_UPDATE = "server.status.UPDATE";
 
 	private long id;
 	private String host;
-	private boolean done = true;
+	private boolean checkRunning;
 	private ArrayList<Checker> checkers = new ArrayList<Checker>();
 	private ArrayList<Status> results = new ArrayList<Status>();
 
-	public Server(long id, String host) {
+	public Server(long id, String host, boolean checkRunning) {
 		this.id = id;
 		this.host = host;
+		this.checkRunning = checkRunning;
 	}
 
 	public Server(String host) {
-		this(-1, host);
+		this(-1, host, false);
 	}
 
 	public String getHost() {
@@ -67,12 +67,8 @@ public class Server implements Comparable<Server> {
 		this.id = id;
 	}
 
-	public void setDone(boolean done) {
-		this.done = done;
-	}
-
-	public boolean isDone() {
-		return done;
+	public boolean isCheckRunning() {
+		return checkRunning;
 	}
 
 	public void addChecker(Checker checker) {
@@ -94,16 +90,24 @@ public class Server implements Comparable<Server> {
 		int size = checkers.size();
 		if (size > 0) {
 			// Send initial update to indicate that it started
+			checkRunning = true;
+			boolean updated = ServerDbHelper.getInstance(context).update(this);
+			if (updated) {
+				Intent intent = new Intent(BROADCAST_UPDATE);
+				intent.putExtra(INTENT_ID, id);
+				context.sendBroadcast(intent);
+			}
+		} else {
 			// No point to send if there is nothing to do
-			Intent intent = new Intent(BROADCAST_UPDATE);
-			intent.putExtra(INTENT_ID, id);
-			// Done when last is updated
-			intent.putExtra(INTENT_DONE, false);
-			context.sendBroadcast(intent);
+			checkRunning = false;
 		}
 		for (int i = 0; i < size; i++) {
 			Checker checker = checkers.get(i);
 			Status status = checker.check(host, settings);
+			// Done when last has been checked
+			if (i + 1 == size) {
+				checkRunning = false;
+			}
 			boolean saved = ServerDbHelper.getInstance(context).save(this,
 					checker, status);
 			if (saved) {
@@ -111,8 +115,6 @@ public class Server implements Comparable<Server> {
 				// Send update
 				Intent intent = new Intent(BROADCAST_UPDATE);
 				intent.putExtra(INTENT_ID, id);
-				// Done when last is updated
-				intent.putExtra(INTENT_DONE, (i + 1 == size));
 				context.sendBroadcast(intent);
 				if (status.result == Result.PASS) {
 					count++;
