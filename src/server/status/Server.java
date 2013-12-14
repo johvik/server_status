@@ -89,18 +89,19 @@ public class Server implements Comparable<Server> {
 		int count = 0;
 		int size = checkers.size();
 		if (size > 0) {
-			// Send initial update to indicate that it started
 			checkRunning = true;
-			boolean updated = ServerDbHelper.getInstance(context).update(this);
-			if (updated) {
-				Intent intent = new Intent(BROADCAST_UPDATE);
-				intent.putExtra(INTENT_ID, id);
-				context.sendBroadcast(intent);
-			}
 		} else {
-			// No point to send if there is nothing to do
+			// No checks to run
 			checkRunning = false;
 		}
+		// Send initial update to indicate that it started (or not)
+		boolean updated = ServerDbHelper.getInstance(context).update(this);
+		if (updated) {
+			Intent intent = new Intent(BROADCAST_UPDATE);
+			intent.putExtra(INTENT_ID, id);
+			context.sendBroadcast(intent);
+		}
+		// Run all checkers and update results
 		for (int i = 0; i < size; i++) {
 			Checker checker = checkers.get(i);
 			Status status = checker.check(host, settings);
