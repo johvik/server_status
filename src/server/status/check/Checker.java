@@ -1,5 +1,6 @@
 package server.status.check;
 
+import android.content.Context;
 import server.status.Settings;
 
 public abstract class Checker {
@@ -43,6 +44,8 @@ public abstract class Checker {
 	public abstract Type getType();
 
 	public abstract String getArgs();
+
+	public abstract String getName(Context context);
 
 	public static Checker parse(long id, Type type, String args) {
 		switch (type) {

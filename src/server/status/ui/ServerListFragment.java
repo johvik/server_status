@@ -3,6 +3,7 @@ package server.status.ui;
 import java.util.ArrayList;
 import java.util.Collections;
 
+import server.status.EditActivity;
 import server.status.R;
 import server.status.Server;
 import server.status.Settings;
@@ -11,12 +12,12 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.DialogInterface.OnClickListener;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,9 +27,6 @@ import android.widget.ExpandableListView.ExpandableListContextMenuInfo;
 import android.widget.Toast;
 
 public class ServerListFragment extends Fragment {
-	private static final int ID_UPDATE = 1;
-	private static final int ID_EDIT = 2;
-	private static final int ID_REMOVE = 3;
 	private static final String BUNDLE_EXPANDED = "exp";
 
 	private ExpandableListView listViewServers = null;
@@ -182,7 +180,10 @@ public class ServerListFragment extends Fragment {
 	}
 
 	private void edit(Server server) {
-		// TODO Edit activity
+		Intent intent = new Intent(getActivity().getApplicationContext(),
+				EditActivity.class);
+		intent.putExtra(EditActivity.INTENT_ID, server.getId());
+		startActivity(intent);
 	}
 
 	private void remove(final Server server) {
@@ -247,15 +248,12 @@ public class ServerListFragment extends Fragment {
 	public void onCreateContextMenu(ContextMenu menu, View v,
 			ContextMenuInfo menuInfo) {
 		if (v.getId() == R.id.listViewServers) {
+			getActivity().getMenuInflater().inflate(R.menu.server, menu);
+			// Set title of the menu
 			ExpandableListContextMenuInfo info = (ExpandableListContextMenuInfo) menuInfo;
 			Server server = servers.get(ExpandableListView
 					.getPackedPositionGroup(info.packedPosition));
 			menu.setHeaderTitle(server.getHost());
-			menu.add(Menu.NONE, ID_UPDATE, Menu.NONE,
-					R.string.action_update_server);
-			menu.add(Menu.NONE, ID_EDIT, Menu.NONE, R.string.action_edit_server);
-			menu.add(Menu.NONE, ID_REMOVE, Menu.NONE,
-					R.string.action_remove_server);
 		} else {
 			super.onCreateContextMenu(menu, v, menuInfo);
 		}
@@ -264,21 +262,21 @@ public class ServerListFragment extends Fragment {
 	@Override
 	public boolean onContextItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
-		case ID_UPDATE: {
+		case R.id.action_server_update_now: {
 			ExpandableListContextMenuInfo info = (ExpandableListContextMenuInfo) item
 					.getMenuInfo();
 			update(servers.get(ExpandableListView
 					.getPackedPositionGroup(info.packedPosition)));
 			return true;
 		}
-		case ID_EDIT: {
+		case R.id.action_server_edit: {
 			ExpandableListContextMenuInfo info = (ExpandableListContextMenuInfo) item
 					.getMenuInfo();
 			edit(servers.get(ExpandableListView
 					.getPackedPositionGroup(info.packedPosition)));
 			return true;
 		}
-		case ID_REMOVE: {
+		case R.id.action_server_remove: {
 			ExpandableListContextMenuInfo info = (ExpandableListContextMenuInfo) item
 					.getMenuInfo();
 			remove(servers.get(ExpandableListView

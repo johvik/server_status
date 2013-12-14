@@ -6,6 +6,8 @@ import java.net.HttpURLConnection;
 import java.net.SocketTimeoutException;
 import java.net.URL;
 
+import android.content.Context;
+import server.status.R;
 import server.status.Settings;
 
 public class Http extends Checker {
@@ -64,6 +66,11 @@ public class Http extends Checker {
 	@Override
 	public String getArgs() {
 		return port + " " + responseCode;
+	}
+
+	@Override
+	public String getName(Context context) {
+		return context.getString(R.string.checker_http);
 	}
 
 	public static Http parse(long id, String args) {

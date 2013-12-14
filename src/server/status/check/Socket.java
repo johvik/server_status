@@ -5,6 +5,8 @@ import java.net.ConnectException;
 import java.net.InetSocketAddress;
 import java.net.SocketTimeoutException;
 
+import android.content.Context;
+import server.status.R;
 import server.status.Settings;
 
 public class Socket extends Checker {
@@ -49,6 +51,11 @@ public class Socket extends Checker {
 	@Override
 	public String getArgs() {
 		return String.valueOf(port);
+	}
+
+	@Override
+	public String getName(Context context) {
+		return context.getString(R.string.checker_socket);
 	}
 
 	public static Socket parse(long id, String args) {

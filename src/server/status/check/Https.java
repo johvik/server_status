@@ -16,6 +16,8 @@ import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
+import android.content.Context;
+import server.status.R;
 import server.status.Settings;
 
 public class Https extends Checker {
@@ -110,6 +112,11 @@ public class Https extends Checker {
 	@Override
 	public String getArgs() {
 		return port + " " + responseCode + " " + allCertificates;
+	}
+
+	@Override
+	public String getName(Context context) {
+		return context.getString(R.string.checker_https);
 	}
 
 	public static Https parse(long id, String args) {

@@ -2,6 +2,8 @@ package server.status.check;
 
 import java.io.IOException;
 
+import android.content.Context;
+import server.status.R;
 import server.status.Settings;
 
 public class Ping extends Checker {
@@ -45,6 +47,11 @@ public class Ping extends Checker {
 	@Override
 	public String getArgs() {
 		return "";
+	}
+
+	@Override
+	public String getName(Context context) {
+		return context.getString(R.string.checker_ping);
 	}
 
 	public static Ping parse(long id, String args) {

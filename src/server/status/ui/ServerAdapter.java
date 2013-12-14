@@ -95,7 +95,7 @@ public class ServerAdapter extends BaseExpandableListAdapter {
 		} else {
 			color = COLOR_PASS;
 		}
-		text1.setText(checker.getClass().getSimpleName());
+		text1.setText(checker.getName(context));
 		long time = result.time;
 		String oldestTime;
 		if (time > 0) {
