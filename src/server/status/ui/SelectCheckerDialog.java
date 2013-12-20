@@ -1,6 +1,7 @@
 package server.status.ui;
 
 import server.status.R;
+import server.status.check.Checker;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -11,7 +12,7 @@ import android.support.v4.app.DialogFragment;
 
 public class SelectCheckerDialog extends DialogFragment {
 	public interface SelectCheckerListener {
-		public void onSelectChecker(int index);
+		public void onSelectChecker(Checker checker);
 	}
 
 	private SelectCheckerListener listener;
@@ -35,7 +36,8 @@ public class SelectCheckerDialog extends DialogFragment {
 		builder.setItems(R.array.checkers_array, new OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
-				listener.onSelectChecker(which);
+				// TODO Also select settings if appropriate?
+				listener.onSelectChecker(Checker.fromIndex(which));
 			}
 		});
 		return builder.create();

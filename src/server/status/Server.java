@@ -85,6 +85,13 @@ public class Server implements Comparable<Server> {
 		results.add(status);
 	}
 
+	public void removeChecker(int index) {
+		if (index >= 0 && index < checkers.size()) {
+			checkers.remove(index);
+			results.remove(index);
+		}
+	}
+
 	public Pair<Checker, Status> get(int index) {
 		return Pair.create(checkers.get(index), results.get(index));
 	}

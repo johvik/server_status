@@ -1,0 +1,16 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <item
+        android:id="@+id/action_server_checker_update_now"
+        android:orderInCategory="100"
+        android:title="@string/action_server_checker_update_now"/>
+    <item
+        android:id="@+id/action_server_checker_edit"
+        android:orderInCategory="101"
+        android:title="@string/action_server_checker_edit"/>
+    <item
+        android:id="@+id/action_server_checker_remove"
+        android:orderInCategory="102"
+        android:title="@string/action_server_checker_remove"/>
+
+</menu>

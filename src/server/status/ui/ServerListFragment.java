@@ -6,7 +6,9 @@ import java.util.Collections;
 import server.status.R;
 import server.status.Server;
 import server.status.Settings;
+import server.status.check.Checker;
 import server.status.db.ServerDbHelper;
+import server.status.ui.SelectCheckerDialog.SelectCheckerListener;
 import server.status.ui.ServerHostDialog.ServerHostListener;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -25,7 +27,8 @@ import android.widget.ExpandableListView;
 import android.widget.ExpandableListView.ExpandableListContextMenuInfo;
 import android.widget.Toast;
 
-public class ServerListFragment extends Fragment implements ServerHostListener {
+public class ServerListFragment extends Fragment implements ServerHostListener,
+		SelectCheckerListener {
 	private static final String BUNDLE_EXPANDED = "exp";
 
 	private ExpandableListView listViewServers = null;
@@ -123,6 +126,7 @@ public class ServerListFragment extends Fragment implements ServerHostListener {
 	 * Replaces the server list with a newly loaded one.
 	 */
 	private void refreshAll() {
+		// TODO A more stable way of handling the data
 		final Activity activity = getActivity();
 		final Context context = activity.getApplicationContext();
 		new Thread(new Runnable() {
@@ -201,6 +205,7 @@ public class ServerListFragment extends Fragment implements ServerHostListener {
 	}
 
 	private void changeHost(Server server) {
+		// TODO Does not work when rotating the screen
 		this.editServer = server;
 		ServerHostDialog dialog = new ServerHostDialog();
 		Bundle args = new Bundle();
@@ -210,7 +215,10 @@ public class ServerListFragment extends Fragment implements ServerHostListener {
 	}
 
 	private void addChecker(Server server) {
-		// TODO
+		// TODO Does not work when rotating the screen
+		this.editServer = server;
+		SelectCheckerDialog dialog = new SelectCheckerDialog();
+		dialog.show(getFragmentManager(), "SelectCheckerDialog");
 	}
 
 	private void remove(final Server server) {
@@ -275,12 +283,24 @@ public class ServerListFragment extends Fragment implements ServerHostListener {
 	public void onCreateContextMenu(ContextMenu menu, View v,
 			ContextMenuInfo menuInfo) {
 		if (v.getId() == R.id.listViewServers) {
-			getActivity().getMenuInflater().inflate(R.menu.server, menu);
-			// Set title of the menu
 			ExpandableListContextMenuInfo info = (ExpandableListContextMenuInfo) menuInfo;
-			Server server = servers.get(ExpandableListView
-					.getPackedPositionGroup(info.packedPosition));
-			menu.setHeaderTitle(server.getHost());
+			int positionGroup = ExpandableListView
+					.getPackedPositionGroup(info.packedPosition);
+			int positionType = ExpandableListView
+					.getPackedPositionType(info.packedPosition);
+			Server server = servers.get(positionGroup);
+			Activity activity = getActivity();
+			if (positionType == ExpandableListView.PACKED_POSITION_TYPE_GROUP) {
+				activity.getMenuInflater().inflate(R.menu.server, menu);
+				// Set title of the menu
+				menu.setHeaderTitle(server.getHost());
+			} else if (positionType == ExpandableListView.PACKED_POSITION_TYPE_CHILD) {
+				int positionChild = ExpandableListView
+						.getPackedPositionChild(info.packedPosition);
+				activity.getMenuInflater().inflate(R.menu.server_checker, menu);
+				menu.setHeaderTitle(server.getCheckers().get(positionChild)
+						.getName(activity));
+			}
 		} else {
 			super.onCreateContextMenu(menu, v, menuInfo);
 		}
@@ -288,39 +308,69 @@ public class ServerListFragment extends Fragment implements ServerHostListener {
 
 	@Override
 	public boolean onContextItemSelected(MenuItem item) {
-		// TODO Handle click on childs
-		switch (item.getItemId()) {
-		case R.id.action_server_update_now: {
-			ExpandableListContextMenuInfo info = (ExpandableListContextMenuInfo) item
-					.getMenuInfo();
-			update(servers.get(ExpandableListView
-					.getPackedPositionGroup(info.packedPosition)));
-			return true;
+		ContextMenuInfo menuInfo = item.getMenuInfo();
+		if (menuInfo instanceof ExpandableListContextMenuInfo) {
+			ExpandableListContextMenuInfo info = (ExpandableListContextMenuInfo) menuInfo;
+			int positionGroup = ExpandableListView
+					.getPackedPositionGroup(info.packedPosition);
+			int positionChild = ExpandableListView
+					.getPackedPositionChild(info.packedPosition);
+			Server server = servers.get(positionGroup);
+			switch (item.getItemId()) {
+			case R.id.action_server_update_now:
+				update(server);
+				return true;
+			case R.id.action_server_change_host:
+				changeHost(server);
+				return true;
+			case R.id.action_server_add_checker:
+				addChecker(server);
+				return true;
+			case R.id.action_server_remove:
+				remove(server);
+				return true;
+			case R.id.action_server_checker_update_now:
+				update(server, positionChild);
+				return true;
+			case R.id.action_server_checker_edit:
+				edit(server, positionChild);
+				return true;
+			case R.id.action_server_checker_remove:
+				remove(server, positionChild);
+				return true;
+			}
 		}
-		case R.id.action_server_change_host: {
-			ExpandableListContextMenuInfo info = (ExpandableListContextMenuInfo) item
-					.getMenuInfo();
-			changeHost(servers.get(ExpandableListView
-					.getPackedPositionGroup(info.packedPosition)));
-			return true;
-		}
-		case R.id.action_server_add_checker: {
-			ExpandableListContextMenuInfo info = (ExpandableListContextMenuInfo) item
-					.getMenuInfo();
-			addChecker(servers.get(ExpandableListView
-					.getPackedPositionGroup(info.packedPosition)));
-			return true;
-		}
-		case R.id.action_server_remove: {
-			ExpandableListContextMenuInfo info = (ExpandableListContextMenuInfo) item
-					.getMenuInfo();
-			remove(servers.get(ExpandableListView
-					.getPackedPositionGroup(info.packedPosition)));
-			return true;
-		}
-		default:
-			return super.onContextItemSelected(item);
-		}
+		return super.onContextItemSelected(item);
+	}
+
+	private void update(Server server, int index) {
+		// TODO Update checker
+	}
+
+	private void edit(Server server, int index) {
+		// TODO Edit checker
+	}
+
+	private void remove(final Server server, int index) {
+		server.removeChecker(index);
+		final Activity activity = getActivity();
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				final boolean updated = ServerDbHelper.getInstance(
+						activity.getApplicationContext()).update(server);
+				activity.runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
+						if (!updated) {
+							Toast.makeText(activity, R.string.server_save_fail,
+									Toast.LENGTH_SHORT).show();
+						}
+						serverAdapter.notifyDataSetChanged();
+					}
+				});
+			}
+		}).start();
 	}
 
 	@Override
@@ -341,6 +391,43 @@ public class ServerListFragment extends Fragment implements ServerHostListener {
 								Toast.makeText(activity,
 										R.string.server_save_fail,
 										Toast.LENGTH_SHORT).show();
+							}
+							serverAdapter.notifyDataSetChanged();
+							editServer = null;
+						}
+					});
+				}
+			}).start();
+		}
+	}
+
+	@Override
+	public void onSelectChecker(Checker checker) {
+		if (editServer != null) {
+			editServer.addChecker(checker);
+			final Activity activity = getActivity();
+			new Thread(new Runnable() {
+				@Override
+				public void run() {
+					final boolean updated = ServerDbHelper.getInstance(
+							activity.getApplicationContext())
+							.update(editServer);
+					activity.runOnUiThread(new Runnable() {
+						@Override
+						public void run() {
+							if (!updated) {
+								Toast.makeText(activity,
+										R.string.server_save_fail,
+										Toast.LENGTH_SHORT).show();
+							} else {
+								// Expand
+								long id = editServer.getId();
+								for (int i = 0, j = servers.size(); i < j; i++) {
+									if (id == servers.get(i).getId()) {
+										listViewServers.expandGroup(i);
+										break;
+									}
+								}
 							}
 							serverAdapter.notifyDataSetChanged();
 							editServer = null;

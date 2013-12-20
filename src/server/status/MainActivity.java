@@ -1,11 +1,13 @@
 package server.status;
 
+import server.status.check.Checker;
 import server.status.check.Http;
 import server.status.check.Https;
 import server.status.check.Ping;
 import server.status.check.Socket;
 import server.status.db.ServerDbHelper;
 import server.status.service.Starter;
+import server.status.ui.SelectCheckerDialog.SelectCheckerListener;
 import server.status.ui.ServerHostDialog.ServerHostListener;
 import server.status.ui.ServerListFragment;
 import android.os.Bundle;
@@ -20,7 +22,7 @@ import android.view.MenuItem;
 import android.widget.Toast;
 
 public class MainActivity extends FragmentActivity implements
-		ServerHostListener {
+		ServerHostListener, SelectCheckerListener {
 	private ServerListFragment serverListFragment;
 	private BroadcastReceiver receiver = new BroadcastReceiver() {
 		@Override
@@ -101,5 +103,10 @@ public class MainActivity extends FragmentActivity implements
 	@Override
 	public void onHostChange(String host) {
 		serverListFragment.onHostChange(host);
+	}
+
+	@Override
+	public void onSelectChecker(Checker checker) {
+		serverListFragment.onSelectChecker(checker);
 	}
 }

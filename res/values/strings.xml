@@ -12,6 +12,9 @@
     <string name="action_server_update_now">Update now</string>
     <string name="action_server_change_host">Change host</string>
     <string name="action_server_remove">Remove</string>
+    <string name="action_server_checker_update_now">Update now</string>
+    <string name="action_server_checker_edit">Edit</string>
+    <string name="action_server_checker_remove">Remove</string>
     <string name="action_settings">Settings</string>
     <string name="checker_http">Http</string>
     <string name="checker_https">Https</string>
@@ -26,7 +29,6 @@
     <string name="pref_timeout">Timeout</string>
     <string name="pref_timeout_summ">Connections timeout after %1$s milliseconds</string>
     <string name="never">Never</string>
-    <string name="empty_checker_list">No checkers added =(\nUse "Add checker" in the menu.</string>
     <string name="empty_server_list">No servers added =(</string>
     <string name="empty_host">&lt;Blank&gt;</string>
     <string name="server_add_fail">Failed to add server</string>
