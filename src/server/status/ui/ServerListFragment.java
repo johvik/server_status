@@ -124,20 +124,15 @@ public class ServerListFragment extends Fragment implements ServerHostListener,
 	 */
 	private void update(final Server server) {
 		final Context context = getActivity().getApplicationContext();
-		if (!server.isCheckRunning()) {
-			// TODO Update should run in a service?
-			new Thread(new Runnable() {
-				@Override
-				public void run() {
-					Settings settings = new Settings();
-					settings.loadSettings(context);
-					server.check(settings, context);
-				}
-			}).start();
-		} else {
-			Toast.makeText(context, getString(R.string.update_running),
-					Toast.LENGTH_SHORT).show();
-		}
+		// TODO Update should run in a service?
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				Settings settings = new Settings();
+				settings.loadSettings(context);
+				server.check(settings, context);
+			}
+		}).start();
 	}
 
 	private void changeHost(Server server) {
