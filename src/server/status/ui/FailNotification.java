@@ -50,10 +50,13 @@ public class FailNotification {
 				.setSmallIcon(R.drawable.ic_stat_fail)
 				.setContentIntent(pendingIntent).setAutoCancel(true)
 				.setStyle(inboxStyle);
+		int defaults = Notification.DEFAULT_LIGHTS;
 		if (settings.notificationSound()) {
-			// Play sound
-			notificationBuilder.setDefaults(Notification.DEFAULT_SOUND);
+			// Play sound and vibrate
+			defaults |= Notification.DEFAULT_SOUND;
+			defaults |= Notification.DEFAULT_VIBRATE;
 		}
+		notificationBuilder.setDefaults(defaults);
 		notificationManager.notify((int) server.getId(),
 				notificationBuilder.build());
 	}
