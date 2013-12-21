@@ -17,11 +17,9 @@ import android.content.Intent;
 import android.support.v4.app.NotificationCompat;
 
 public class FailNotification {
-	public static final String INTENT_ID = "sid";
 
 	public static void show(Context context, Settings settings, Server server) {
 		Intent intent = new Intent(context, MainActivity.class);
-		intent.putExtra(INTENT_ID, server.getId());
 		String host = server.getHost();
 		if (host.trim().length() == 0) {
 			host = context.getString(R.string.empty_host);

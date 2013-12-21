@@ -138,7 +138,6 @@ public class ServerDbHelper extends SQLiteOpenHelper {
 			if (1 == count) {
 				deleteCheckerStatus(server, db);
 				db.setTransactionSuccessful();
-				server.setId(-1);
 				return true;
 			}
 			return false;

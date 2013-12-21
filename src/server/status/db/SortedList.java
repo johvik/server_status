@@ -50,6 +50,21 @@ public class SortedList<E extends Comparable<E>> implements Collection<E>,
 		return true;
 	}
 
+	/**
+	 * Finds object in the list.
+	 * 
+	 * @param e
+	 *            Object to find.
+	 * @return Instance of e in list or null.
+	 */
+	public E find(E e) {
+		int index = Collections.binarySearch(list, e);
+		if (index >= 0) {
+			return list.get(index);
+		}
+		return null;
+	}
+
 	public E get(int index) {
 		return list.get(index);
 	}
@@ -57,6 +72,21 @@ public class SortedList<E extends Comparable<E>> implements Collection<E>,
 	@Override
 	public boolean isEmpty() {
 		return list.isEmpty();
+	}
+
+	/**
+	 * Gets the index of element e.
+	 * 
+	 * @param e
+	 *            Element to find
+	 * @return Index of element or -1 if not found.
+	 */
+	public int indexOf(E e) {
+		int index = Collections.binarySearch(list, e);
+		if (index >= 0) {
+			return index;
+		}
+		return -1;
 	}
 
 	@Override

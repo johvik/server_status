@@ -12,6 +12,8 @@ import android.widget.EditText;
 
 public class ServerHostDialog extends DialogFragment {
 	public static final String INTENT_HOST = "ho";
+	private static final String BUNDLE_HOST = "host";
+	private EditText editText;
 
 	public interface ServerHostListener {
 		public void onHostChange(String host);
@@ -32,18 +34,30 @@ public class ServerHostDialog extends DialogFragment {
 	}
 
 	@Override
+	public void onSaveInstanceState(Bundle outState) {
+		outState.putString(BUNDLE_HOST, editText.getText().toString());
+		super.onSaveInstanceState(outState);
+	}
+
+	@Override
 	public Dialog onCreateDialog(Bundle savedInstanceState) {
 		Activity activity = getActivity();
 		AlertDialog.Builder builder = new AlertDialog.Builder(activity);
 		builder.setTitle(getString(R.string.server_host_change));
-		final EditText editText = new EditText(activity);
+		editText = new EditText(activity);
 		editText.setHint(R.string.hint_host_change);
-		Bundle args = getArguments();
-		if (args != null) {
-			String host = args.getString(INTENT_HOST);
-			if (host != null) {
-				editText.setText(host);
+		String host = null;
+		// Get saved host or just arguments
+		if (savedInstanceState != null) {
+			host = savedInstanceState.getString(BUNDLE_HOST);
+		} else {
+			Bundle args = getArguments();
+			if (args != null) {
+				host = args.getString(INTENT_HOST);
 			}
+		}
+		if (host != null) {
+			editText.setText(host);
 		}
 		builder.setView(editText);
 		builder.setPositiveButton(R.string.button_ok, new OnClickListener() {

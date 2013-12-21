@@ -20,7 +20,6 @@
     <string name="checker_https">Https</string>
     <string name="checker_ping">Ping</string>
     <string name="checker_socket">Socket</string>
-    <string name="update_running">Update is already running</string>
     <string name="pref_enabled">Enabled</string>
     <string name="pref_enabled_summ">Run status updates on a schedule</string>
     <string name="pref_sound">Notification sound</string>

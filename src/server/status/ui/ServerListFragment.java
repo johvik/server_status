@@ -6,17 +6,10 @@ import java.util.Observer;
 
 import server.status.R;
 import server.status.Server;
-import server.status.Settings;
-import server.status.check.Checker;
 import server.status.db.ServerData;
 import server.status.db.SortedList;
-import server.status.ui.SelectCheckerDialog.SelectCheckerListener;
-import server.status.ui.ServerHostDialog.ServerHostListener;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.DialogInterface.OnClickListener;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.ContextMenu;
@@ -27,23 +20,48 @@ import android.view.ViewGroup;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.widget.ExpandableListView;
 import android.widget.ExpandableListView.ExpandableListContextMenuInfo;
-import android.widget.Toast;
 
-public class ServerListFragment extends Fragment implements ServerHostListener,
-		SelectCheckerListener, Observer {
+public class ServerListFragment extends Fragment implements Observer {
+	public interface ServerListFragmentListener {
+		public void onUpdateNow(Server server);
+
+		public void onChangeHost(Server server);
+
+		public void onAddChecker(Server server);
+
+		public void onRemove(Server server);
+
+		public void onUpdateChecker(Server server, int index);
+
+		public void onEditChecker(Server server, int index);
+
+		public void onRemoveChecker(Server server, int index);
+	}
+
 	private static final String BUNDLE_EXPANDED = "exp";
 
 	private ExpandableListView listViewServers = null;
 	private ServerAdapter serverAdapter;
-	private final SortedList<Server> servers2;
-	private ArrayList<Integer> expanded = new ArrayList<Integer>();
-	private long expandServerId = -1;
-	private Server editServer = null;
+	private final SortedList<Server> servers;
+	private boolean expanded = false;
+	private ArrayList<Integer> expandedIndexes = new ArrayList<Integer>();
 
-	// TODO Rework this fragment...
+	private ServerListFragmentListener serverListFragmentListener;
 
 	public ServerListFragment() {
-		servers2 = ServerData.getInstance().getServers();
+		servers = ServerData.getInstance().getServers();
+	}
+
+	@Override
+	public void onAttach(Activity activity) {
+		super.onAttach(activity);
+		// Attach listener
+		if (activity instanceof ServerListFragmentListener) {
+			serverListFragmentListener = (ServerListFragmentListener) activity;
+		} else {
+			throw new ClassCastException(activity.toString()
+					+ " must implement ServerListFragmentListener");
+		}
 	}
 
 	@Override
@@ -53,7 +71,7 @@ public class ServerListFragment extends Fragment implements ServerHostListener,
 			ArrayList<Integer> expanded = savedInstanceState
 					.getIntegerArrayList(BUNDLE_EXPANDED);
 			if (expanded != null) {
-				this.expanded.addAll(expanded);
+				expandedIndexes.addAll(expanded);
 			}
 		}
 		super.onCreate(savedInstanceState);
@@ -61,6 +79,7 @@ public class ServerListFragment extends Fragment implements ServerHostListener,
 
 	@Override
 	public void onResume() {
+		// Listen for changes in data
 		ServerData serverData = ServerData.getInstance();
 		serverData.addObserver(this);
 		serverData.loadServersAsync(getActivity().getApplicationContext());
@@ -69,6 +88,7 @@ public class ServerListFragment extends Fragment implements ServerHostListener,
 
 	@Override
 	public void onPause() {
+		// Stop listening to data
 		ServerData serverData = ServerData.getInstance();
 		serverData.deleteObserver(this);
 		super.onPause();
@@ -89,104 +109,6 @@ public class ServerListFragment extends Fragment implements ServerHostListener,
 		super.onSaveInstanceState(outState);
 	}
 
-	/**
-	 * Used after refreshAll
-	 * 
-	 * @param id
-	 */
-	public void expandServer(long id) {
-		expandServerId = id;
-	}
-
-	public void addServer(Server server) {
-		final Activity activity = getActivity();
-		ServerData.getInstance().insertAsync(activity.getApplicationContext(),
-				server, new Runnable() {
-					@Override
-					public void run() {
-						activity.runOnUiThread(new Runnable() {
-							@Override
-							public void run() {
-								Toast.makeText(activity,
-										R.string.server_save_fail,
-										Toast.LENGTH_SHORT).show();
-							}
-						});
-					}
-				});
-	}
-
-	/**
-	 * Manually starts an update
-	 * 
-	 * @param index
-	 *            Index of the server to start
-	 */
-	private void update(final Server server) {
-		final Context context = getActivity().getApplicationContext();
-		// TODO Update should run in a service?
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				Settings settings = new Settings();
-				settings.loadSettings(context);
-				server.check(settings, context);
-			}
-		}).start();
-	}
-
-	private void changeHost(Server server) {
-		// TODO Does not work when rotating the screen
-		this.editServer = server;
-		ServerHostDialog dialog = new ServerHostDialog();
-		Bundle args = new Bundle();
-		args.putString(ServerHostDialog.INTENT_HOST, server.getHost());
-		dialog.setArguments(args);
-		dialog.show(getFragmentManager(), "ServerHostDialog");
-	}
-
-	private void addChecker(Server server) {
-		// TODO Does not work when rotating the screen
-		this.editServer = server;
-		SelectCheckerDialog dialog = new SelectCheckerDialog();
-		dialog.show(getFragmentManager(), "SelectCheckerDialog");
-	}
-
-	private void remove(final Server server) {
-		final Activity activity = getActivity();
-		final Context context = activity.getApplicationContext();
-		new AlertDialog.Builder(activity)
-				.setMessage(
-						getString(R.string.server_remove_confirm,
-								server.getHost()))
-				.setPositiveButton(getString(R.string.button_ok),
-						new OnClickListener() {
-							@Override
-							public void onClick(DialogInterface dialog,
-									int which) {
-								// OK clicked, lets remove
-								ServerData.getInstance().deleteAsync(context,
-										server, new Runnable() {
-											@Override
-											public void run() {
-												activity.runOnUiThread(new Runnable() {
-													@Override
-													public void run() {
-														Toast.makeText(
-																context,
-																context.getString(R.string.server_remove_fail),
-																Toast.LENGTH_SHORT)
-																.show();
-													}
-												});
-											}
-										});
-							}
-						})
-				.setNegativeButton(getString(R.string.button_cancel), null)
-				.show();
-	}
-
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
@@ -196,10 +118,11 @@ public class ServerListFragment extends Fragment implements ServerHostListener,
 				.findViewById(R.id.listViewServers);
 		listViewServers.setEmptyView(view.findViewById(R.id.textViewEmptyList));
 		Context context = getActivity().getApplicationContext();
-		serverAdapter = new ServerAdapter(context, servers2);
+		serverAdapter = new ServerAdapter(context, servers);
 		listViewServers.setAdapter(serverAdapter);
 		// Long click menu
 		registerForContextMenu(listViewServers);
+		updateExpanded();
 		return view;
 	}
 
@@ -212,7 +135,7 @@ public class ServerListFragment extends Fragment implements ServerHostListener,
 					.getPackedPositionGroup(info.packedPosition);
 			int positionType = ExpandableListView
 					.getPackedPositionType(info.packedPosition);
-			Server server = servers2.get(positionGroup);
+			Server server = servers.get(positionGroup);
 			Activity activity = getActivity();
 			if (positionType == ExpandableListView.PACKED_POSITION_TYPE_GROUP) {
 				activity.getMenuInflater().inflate(R.menu.server, menu);
@@ -239,114 +162,62 @@ public class ServerListFragment extends Fragment implements ServerHostListener,
 					.getPackedPositionGroup(info.packedPosition);
 			int positionChild = ExpandableListView
 					.getPackedPositionChild(info.packedPosition);
-			Server server = servers2.get(positionGroup);
+			Server server = servers.get(positionGroup);
 			switch (item.getItemId()) {
 			case R.id.action_server_update_now:
-				update(server);
+				serverListFragmentListener.onUpdateNow(server);
 				return true;
 			case R.id.action_server_change_host:
-				changeHost(server);
+				serverListFragmentListener.onChangeHost(server);
 				return true;
 			case R.id.action_server_add_checker:
-				addChecker(server);
+				serverListFragmentListener.onAddChecker(server);
 				return true;
 			case R.id.action_server_remove:
-				remove(server);
+				serverListFragmentListener.onRemove(server);
 				return true;
 			case R.id.action_server_checker_update_now:
-				update(server, positionChild);
+				serverListFragmentListener.onUpdateChecker(server,
+						positionChild);
 				return true;
 			case R.id.action_server_checker_edit:
-				edit(server, positionChild);
+				serverListFragmentListener.onEditChecker(server, positionChild);
 				return true;
 			case R.id.action_server_checker_remove:
-				remove(server, positionChild);
+				serverListFragmentListener.onRemoveChecker(server,
+						positionChild);
 				return true;
 			}
 		}
 		return super.onContextItemSelected(item);
 	}
 
-	private void update(Server server, int index) {
-		// TODO Update checker
-	}
-
-	private void edit(Server server, int index) {
-		// TODO Edit checker
-	}
-
-	private void remove(final Server server, int index) {
-		server.removeChecker(index);
-		final Activity activity = getActivity();
-		ServerData.getInstance().updateAsync(activity.getApplicationContext(),
-				server, new Runnable() {
-					@Override
-					public void run() {
-						activity.runOnUiThread(new Runnable() {
-							@Override
-							public void run() {
-								Toast.makeText(activity,
-										R.string.server_save_fail,
-										Toast.LENGTH_SHORT).show();
-							}
-						});
+	private void updateExpanded() {
+		if (!expanded && listViewServers != null) {
+			int serverCount = servers.size();
+			if (!expandedIndexes.isEmpty()) {
+				int lastIndex = expandedIndexes.get(expandedIndexes.size() - 1);
+				// Check that to avoid index of out bounds
+				if (lastIndex < serverCount) {
+					for (int index : expandedIndexes) {
+						// Expand
+						listViewServers.expandGroup(index);
 					}
-				});
-	}
-
-	@Override
-	public void onHostChange(String host) {
-		if (editServer != null) {
-			editServer.setHost(host);
-			final Activity activity = getActivity();
-			ServerData.getInstance().updateAsync(
-					activity.getApplicationContext(), editServer,
-					new Runnable() {
-						@Override
-						public void run() {
-							activity.runOnUiThread(new Runnable() {
-								@Override
-								public void run() {
-									Toast.makeText(activity,
-											R.string.server_save_fail,
-											Toast.LENGTH_SHORT).show();
-								}
-							});
-						}
-					});
-			editServer = null;
-		}
-	}
-
-	@Override
-	public void onSelectChecker(Checker checker) {
-		if (editServer != null) {
-			editServer.addChecker(checker);
-			final Activity activity = getActivity();
-			ServerData.getInstance().updateAsync(
-					activity.getApplicationContext(), editServer,
-					new Runnable() {
-						@Override
-						public void run() {
-							activity.runOnUiThread(new Runnable() {
-								@Override
-								public void run() {
-									Toast.makeText(activity,
-											R.string.server_save_fail,
-											Toast.LENGTH_SHORT).show();
-								}
-							});
-						}
-					});
-			editServer = null;
+					expanded = true;
+				}
+			} else {
+				expanded = true;
+			}
 		}
 	}
 
 	@Override
 	public void update(Observable observable, Object data) {
+		// Make sure it runs on the UI thread
 		getActivity().runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
+				updateExpanded();
 				serverAdapter.notifyDataSetChanged();
 			}
 		});

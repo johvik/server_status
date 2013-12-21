@@ -27,6 +27,10 @@ public class Server implements Comparable<Server> {
 		this(-1, host, false);
 	}
 
+	public static Server fromId(long id) {
+		return new Server(id, "", false);
+	}
+
 	public String getHost() {
 		return host;
 	}
