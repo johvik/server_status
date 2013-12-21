@@ -6,6 +6,8 @@ import java.net.InetSocketAddress;
 import java.net.SocketTimeoutException;
 
 import android.content.Context;
+import android.os.Parcel;
+import android.os.Parcelable;
 import server.status.R;
 import server.status.Settings;
 
@@ -19,6 +21,10 @@ public class Socket extends Checker {
 	public Socket(long id, int port) {
 		super(id);
 		this.port = port;
+	}
+
+	private Socket(Parcel in) {
+		this(in.readLong(), in.readInt());
 	}
 
 	@Override
@@ -68,4 +74,27 @@ public class Socket extends Checker {
 		}
 		return new Socket(id, port);
 	}
+
+	@Override
+	public int describeContents() {
+		return 0;
+	}
+
+	@Override
+	public void writeToParcel(Parcel dest, int flags) {
+		dest.writeLong(getId());
+		dest.writeInt(port);
+	}
+
+	public static final Parcelable.Creator<Socket> CREATOR = new Creator<Socket>() {
+		@Override
+		public Socket[] newArray(int size) {
+			return new Socket[size];
+		}
+
+		@Override
+		public Socket createFromParcel(Parcel source) {
+			return new Socket(source);
+		}
+	};
 }

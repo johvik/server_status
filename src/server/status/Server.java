@@ -69,6 +69,13 @@ public class Server implements Comparable<Server> {
 		this.host = host;
 	}
 
+	public void setChecker(int index, Checker checker) {
+		int size = checkers.size();
+		if (index >= 0 && index < size) {
+			checkers.set(index, checker);
+		}
+	}
+
 	public boolean isCheckRunning() {
 		return checkRunning;
 	}

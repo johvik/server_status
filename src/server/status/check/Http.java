@@ -7,6 +7,8 @@ import java.net.SocketTimeoutException;
 import java.net.URL;
 
 import android.content.Context;
+import android.os.Parcel;
+import android.os.Parcelable;
 import server.status.R;
 import server.status.Settings;
 
@@ -29,8 +31,24 @@ public class Http extends Checker {
 		this.responseCode = responseCode;
 	}
 
+	private Http(Parcel in) {
+		this(in.readLong(), in.readInt(), in.readInt());
+	}
+
+	public void setPort(int port) {
+		this.port = port;
+	}
+
+	public void setResponseCode(int responseCode) {
+		this.responseCode = responseCode;
+	}
+
 	public int getPort() {
 		return port;
+	}
+
+	public int getResponseCode() {
+		return responseCode;
 	}
 
 	@Override
@@ -90,4 +108,28 @@ public class Http extends Checker {
 		}
 		return new Http(id, port, responseCode);
 	}
+
+	@Override
+	public int describeContents() {
+		return 0;
+	}
+
+	@Override
+	public void writeToParcel(Parcel dest, int flags) {
+		dest.writeLong(getId());
+		dest.writeInt(port);
+		dest.writeInt(responseCode);
+	}
+
+	public static final Parcelable.Creator<Http> CREATOR = new Creator<Http>() {
+		@Override
+		public Http[] newArray(int size) {
+			return new Http[size];
+		}
+
+		@Override
+		public Http createFromParcel(Parcel source) {
+			return new Http(source);
+		}
+	};
 }

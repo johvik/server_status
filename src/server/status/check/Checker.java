@@ -1,9 +1,10 @@
 package server.status.check;
 
 import android.content.Context;
+import android.os.Parcelable;
 import server.status.Settings;
 
-public abstract class Checker {
+public abstract class Checker implements Parcelable {
 	public enum Type {
 		HTTP, HTTPS, PING, SOCKET;
 

@@ -38,6 +38,7 @@
     <string name="hint_host_change">Hostname or IP</string>
     <string name="hint_port">Port</string>
     <string name="hint_response_code">Response code</string>
+    <string name="checker_edit_title">Edit %1$s</string>
 
     <string-array name="checkers_array">
         <item>@string/checker_http</item>

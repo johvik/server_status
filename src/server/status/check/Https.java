@@ -17,6 +17,8 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
 import android.content.Context;
+import android.os.Parcel;
+import android.os.Parcelable;
 import server.status.R;
 import server.status.Settings;
 
@@ -60,6 +62,10 @@ public class Https extends Checker {
 		this.port = port;
 		this.responseCode = responseCode;
 		this.allCertificates = allCertificates;
+	}
+
+	private Https(Parcel in) {
+		this(in.readLong(), in.readInt(), in.readInt(), in.readInt() == 1);
 	}
 
 	@Override
@@ -135,4 +141,29 @@ public class Https extends Checker {
 		}
 		return new Https(id, port, responseCode, allCertificates);
 	}
+
+	@Override
+	public int describeContents() {
+		return 0;
+	}
+
+	@Override
+	public void writeToParcel(Parcel dest, int flags) {
+		dest.writeLong(getId());
+		dest.writeInt(port);
+		dest.writeInt(responseCode);
+		dest.writeInt(allCertificates ? 1 : 0);
+	}
+
+	public static final Parcelable.Creator<Https> CREATOR = new Creator<Https>() {
+		@Override
+		public Https[] newArray(int size) {
+			return new Https[size];
+		}
+
+		@Override
+		public Https createFromParcel(Parcel source) {
+			return new Https(source);
+		}
+	};
 }

@@ -14,6 +14,8 @@ import server.status.ui.ConfirmDialog.ConfirmDialogListener;
 import server.status.ui.SelectCheckerDialog.SelectCheckerListener;
 import server.status.ui.ServerHostDialog.ServerHostListener;
 import server.status.ui.ServerListFragment.ServerListFragmentListener;
+import server.status.ui.checker.CheckerEditDialog;
+import server.status.ui.checker.CheckerEditDialog.CheckerEditDialogListener;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentActivity;
@@ -25,9 +27,11 @@ import android.widget.Toast;
 
 public class MainActivity extends FragmentActivity implements
 		ServerHostListener, SelectCheckerListener, ServerListFragmentListener,
-		ConfirmDialogListener {
+		ConfirmDialogListener, CheckerEditDialogListener {
 	private static final String BUNDLE_EDIT_SERVER_ID = "esid";
+	private static final String BUNDLE_EDIT_CHECKER_INDEX = "ecind";
 	private long editServerId = -1;
+	private int editCheckerIndex = -1;
 	private ServerData serverData;
 	private Runnable serverSaveFail = new Runnable() {
 		@Override
@@ -68,6 +72,8 @@ public class MainActivity extends FragmentActivity implements
 		if (savedInstanceState != null) {
 			editServerId = savedInstanceState
 					.getLong(BUNDLE_EDIT_SERVER_ID, -1);
+			editCheckerIndex = savedInstanceState.getInt(
+					BUNDLE_EDIT_CHECKER_INDEX, -1);
 		}
 
 		serverData = ServerData.getInstance();
@@ -78,6 +84,7 @@ public class MainActivity extends FragmentActivity implements
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
 		outState.putLong(BUNDLE_EDIT_SERVER_ID, editServerId);
+		outState.putInt(BUNDLE_EDIT_CHECKER_INDEX, editCheckerIndex);
 		super.onSaveInstanceState(outState);
 	}
 
@@ -145,6 +152,20 @@ public class MainActivity extends FragmentActivity implements
 	}
 
 	@Override
+	public void onCheckerEditDone(Checker checker) {
+		Server server = serverData.getServers().find(
+				Server.fromId(editServerId));
+		if (server != null) {
+			server.setChecker(editCheckerIndex, checker);
+			server.addChecker(checker);
+			serverData.updateAsync(getApplicationContext(), server,
+					serverSaveFail);
+		}
+		editServerId = -1;
+		editCheckerIndex = -1;
+	}
+
+	@Override
 	public void onUpdateNow(final Server server) {
 		// Force an update
 		new Thread(new Runnable() {
@@ -202,7 +223,14 @@ public class MainActivity extends FragmentActivity implements
 
 	@Override
 	public void onEditChecker(Server server, int index) {
-		// TODO Edit checker
+		editServerId = server.getId();
+		editCheckerIndex = index;
+		Checker checker = server.getCheckers().get(index);
+		CheckerEditDialog dialog = CheckerEditDialog.getEditDialog(checker);
+		Bundle args = new Bundle();
+		args.putParcelable(CheckerEditDialog.INTENT_CHECKER, checker);
+		dialog.setArguments(args);
+		dialog.show(getSupportFragmentManager(), "CheckerEditDialog");
 	}
 
 	@Override

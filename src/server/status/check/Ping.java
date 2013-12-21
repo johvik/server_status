@@ -3,6 +3,8 @@ package server.status.check;
 import java.io.IOException;
 
 import android.content.Context;
+import android.os.Parcel;
+import android.os.Parcelable;
 import server.status.R;
 import server.status.Settings;
 
@@ -14,6 +16,10 @@ public class Ping extends Checker {
 
 	public Ping(long id) {
 		super(id);
+	}
+
+	private Ping(Parcel in) {
+		this(in.readLong());
 	}
 
 	@Override
@@ -57,4 +63,26 @@ public class Ping extends Checker {
 	public static Ping parse(long id, String args) {
 		return new Ping(id);
 	}
+
+	@Override
+	public int describeContents() {
+		return 0;
+	}
+
+	@Override
+	public void writeToParcel(Parcel dest, int flags) {
+		dest.writeLong(getId());
+	}
+
+	public static final Parcelable.Creator<Ping> CREATOR = new Creator<Ping>() {
+		@Override
+		public Ping[] newArray(int size) {
+			return new Ping[size];
+		}
+
+		@Override
+		public Ping createFromParcel(Parcel source) {
+			return new Ping(source);
+		}
+	};
 }
