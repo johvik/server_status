@@ -146,6 +146,17 @@ public class Server implements Comparable<Server> {
 			if (host.trim().length() == 0) {
 				host = context.getString(R.string.empty_host);
 			}
+			NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle();
+			for (int i = 0; i < size; i++) {
+				Status result = results.get(i);
+				if (result.result != Result.PASS) {
+					inboxStyle.addLine(checkers.get(i).getName(context) + " "
+							+ result.reason);
+				}
+			}
+			String summary = context.getString(R.string.notification_text_fail,
+					count, size);
+			inboxStyle.setSummaryText(summary);
 			PendingIntent pendingIntent = PendingIntent.getActivity(context, 0,
 					intent, PendingIntent.FLAG_UPDATE_CURRENT);
 			NotificationManager notificationManager = (NotificationManager) context
@@ -154,12 +165,10 @@ public class Server implements Comparable<Server> {
 					context)
 					.setContentTitle(
 							context.getString(R.string.notification_title_fail,
-									host))
-					.setContentText(
-							context.getString(R.string.notification_text_fail,
-									count, size))
+									host)).setContentText(summary)
 					.setSmallIcon(R.drawable.ic_stat_fail)
-					.setContentIntent(pendingIntent).setAutoCancel(true);
+					.setContentIntent(pendingIntent).setAutoCancel(true)
+					.setStyle(inboxStyle);
 			if (settings.notificationSound()) {
 				// Play sound
 				notificationBuilder.setDefaults(Notification.DEFAULT_SOUND);
