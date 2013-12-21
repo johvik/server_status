@@ -98,6 +98,19 @@ public class Server implements Comparable<Server> {
 		results.clear();
 	}
 
+	public void checkSingle(Settings settings, Context context, int index) {
+		int size = checkers.size();
+		if (index >= 0 && index < size) {
+			Checker checker = checkers.get(index);
+			Status status = checker.check(host, settings);
+			boolean saved = ServerData.getInstance().saveSync(context, this,
+					checker, status);
+			if (saved) {
+				results.set(index, status);
+			}
+		}
+	}
+
 	public void check(Settings settings, Context context) {
 		int count = 0;
 		int size = checkers.size();

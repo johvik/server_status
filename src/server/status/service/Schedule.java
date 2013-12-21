@@ -1,5 +1,8 @@
 package server.status.service;
 
+import server.status.Server;
+import server.status.db.ServerData;
+import server.status.db.SortedList;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningServiceInfo;
 import android.content.BroadcastReceiver;
@@ -10,10 +13,18 @@ public class Schedule extends BroadcastReceiver {
 
 	@Override
 	public void onReceive(Context context, Intent intent) {
+		// Start the service, if not running
 		if (!isServiceRunning(context)) {
-			// Start the service, if not running
-			Intent service = new Intent(context, ServerCheck.class);
-			context.startService(service);
+			ServerData serverData = ServerData.getInstance();
+			// Load servers in this thread
+			serverData.loadServersSync(context);
+			SortedList<Server> servers = serverData.getServers();
+			// Start one service for each server
+			for (Server server : servers) {
+				Intent service = new Intent(context, ServerCheck.class);
+				service.putExtra(ServerCheck.INTENT_SERVER_ID, server.getId());
+				context.startService(service);
+			}
 		}
 	}
 

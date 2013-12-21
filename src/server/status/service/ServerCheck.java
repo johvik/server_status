@@ -3,12 +3,13 @@ package server.status.service;
 import server.status.Server;
 import server.status.Settings;
 import server.status.db.ServerData;
-import server.status.db.SortedList;
 import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
 
 public class ServerCheck extends IntentService {
+	public static final String INTENT_SERVER_ID = "isid";
+
 	public ServerCheck() {
 		super("ServerCheck");
 		// Restart if it is killed while running
@@ -17,7 +18,6 @@ public class ServerCheck extends IntentService {
 
 	@Override
 	protected void onHandleIntent(Intent intent) {
-		// TODO Handle each server in individual intents?
 		Context context = getApplicationContext();
 		Settings settings = new Settings();
 		settings.loadSettings(context);
@@ -25,8 +25,9 @@ public class ServerCheck extends IntentService {
 			ServerData serverData = ServerData.getInstance();
 			// Load servers in this thread
 			serverData.loadServersSync(context);
-			SortedList<Server> servers = serverData.getServers();
-			for (Server server : servers) {
+			long id = intent.getLongExtra(INTENT_SERVER_ID, -1);
+			Server server = serverData.getServers().find(Server.fromId(id));
+			if (server != null) {
 				server.check(settings, context);
 			}
 		}

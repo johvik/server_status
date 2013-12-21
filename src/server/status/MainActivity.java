@@ -146,7 +146,7 @@ public class MainActivity extends FragmentActivity implements
 
 	@Override
 	public void onUpdateNow(final Server server) {
-		// TODO Update should run in a service?
+		// Force an update
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
@@ -187,8 +187,17 @@ public class MainActivity extends FragmentActivity implements
 	}
 
 	@Override
-	public void onUpdateChecker(Server server, int index) {
-		// TODO Update checker
+	public void onUpdateChecker(final Server server, final int index) {
+		// Force an update
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				Context context = getApplicationContext();
+				Settings settings = new Settings();
+				settings.loadSettings(context);
+				server.checkSingle(settings, context, index);
+			}
+		}).start();
 	}
 
 	@Override
