@@ -7,25 +7,25 @@ import server.status.check.Ping;
 import server.status.check.Socket;
 import server.status.db.ServerData;
 import server.status.service.Starter;
+import server.status.ui.ConfirmDialog;
 import server.status.ui.SelectCheckerDialog;
 import server.status.ui.ServerHostDialog;
+import server.status.ui.ConfirmDialog.ConfirmDialogListener;
 import server.status.ui.SelectCheckerDialog.SelectCheckerListener;
 import server.status.ui.ServerHostDialog.ServerHostListener;
 import server.status.ui.ServerListFragment.ServerListFragmentListener;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentActivity;
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.DialogInterface.OnClickListener;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
 public class MainActivity extends FragmentActivity implements
-		ServerHostListener, SelectCheckerListener, ServerListFragmentListener {
+		ServerHostListener, SelectCheckerListener, ServerListFragmentListener,
+		ConfirmDialogListener {
 	private static final String BUNDLE_EDIT_SERVER_ID = "esid";
 	private long editServerId = -1;
 	private ServerData serverData;
@@ -134,6 +134,17 @@ public class MainActivity extends FragmentActivity implements
 	}
 
 	@Override
+	public void onConfirm() {
+		Server server = serverData.getServers().find(
+				Server.fromId(editServerId));
+		if (server != null) {
+			serverData.deleteAsync(getApplicationContext(), server,
+					serverRemoveFail);
+		}
+		editServerId = -1;
+	}
+
+	@Override
 	public void onUpdateNow(final Server server) {
 		// TODO Update should run in a service?
 		new Thread(new Runnable() {
@@ -165,24 +176,14 @@ public class MainActivity extends FragmentActivity implements
 	}
 
 	@Override
-	public void onRemove(final Server server) {
-		// TODO Create confirm dialog fragment
-		new AlertDialog.Builder(this)
-				.setMessage(
-						getString(R.string.server_remove_confirm,
-								server.getHost()))
-				.setPositiveButton(getString(R.string.button_ok),
-						new OnClickListener() {
-							@Override
-							public void onClick(DialogInterface dialog,
-									int which) {
-								// OK clicked, lets remove
-								serverData.deleteAsync(getApplicationContext(),
-										server, serverRemoveFail);
-							}
-						})
-				.setNegativeButton(getString(R.string.button_cancel), null)
-				.show();
+	public void onRemove(Server server) {
+		editServerId = server.getId();
+		ConfirmDialog dialog = new ConfirmDialog();
+		Bundle args = new Bundle();
+		args.putString(ConfirmDialog.INTENT_MESSAGE,
+				getString(R.string.server_remove_confirm, server.getHost()));
+		dialog.setArguments(args);
+		dialog.show(getSupportFragmentManager(), "ConfirmDialog");
 	}
 
 	@Override
