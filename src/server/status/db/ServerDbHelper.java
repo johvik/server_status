@@ -59,7 +59,7 @@ public class ServerDbHelper extends SQLiteOpenHelper {
 		super(context, DATABASE_NAME, null, DATABASE_VERSION);
 	}
 
-	public static ServerDbHelper getInstance(Context context) {
+	static ServerDbHelper getInstance(Context context) {
 		// Singleton pattern
 		if (instance == null) {
 			synchronized (ServerDbHelper.class) {

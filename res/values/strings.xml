@@ -31,7 +31,6 @@
     <string name="never">Never</string>
     <string name="empty_server_list">No servers added =(</string>
     <string name="empty_host">&lt;Blank&gt;</string>
-    <string name="server_add_fail">Failed to add server</string>
     <string name="server_remove_fail">Failed to remove server</string>
     <string name="server_save_fail">Failed to save server</string>
     <string name="server_host_change">Change host</string>

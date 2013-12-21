@@ -18,6 +18,7 @@ import server.status.Server;
 import server.status.check.Checker;
 import server.status.check.Status;
 import server.status.check.Status.Result;
+import server.status.db.SortedList;
 
 public class ServerAdapter extends BaseExpandableListAdapter {
 	private static final int COLOR_FAIL = Color.parseColor("#DC143C");
@@ -25,11 +26,11 @@ public class ServerAdapter extends BaseExpandableListAdapter {
 	private static final int COLOR_PASS = Color.parseColor("#32CD32");
 
 	private final Context context;
-	private final ArrayList<Server> list;
+	private final SortedList<Server> list;
 	private static final SimpleDateFormat format = new SimpleDateFormat(
 			"MMM d, HH:mm", Locale.US);
 
-	public ServerAdapter(Context context, ArrayList<Server> list) {
+	public ServerAdapter(Context context, SortedList<Server> list) {
 		this.context = context;
 		this.list = list;
 	}

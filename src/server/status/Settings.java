@@ -1,8 +1,5 @@
 package server.status;
 
-import java.util.ArrayList;
-
-import server.status.db.ServerDbHelper;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
@@ -15,7 +12,6 @@ public class Settings {
 	private long intervalMS = 600000; // 10min
 	private int timeoutMS = 5000;
 	private int timeout = 5;
-	private ArrayList<Server> servers = new ArrayList<Server>();
 
 	public void loadSettings(Context context) {
 		SharedPreferences sharedPref = PreferenceManager
@@ -38,10 +34,6 @@ public class Settings {
 			intervalMS = 600000;
 			setTimeoutMS(5000);
 		}
-	}
-
-	public void loadServers(Context context) {
-		servers = ServerDbHelper.getInstance(context).load();
 	}
 
 	private void setTimeoutMS(int timeoutMS) {
@@ -67,9 +59,5 @@ public class Settings {
 
 	public int getTimeout() {
 		return timeout;
-	}
-
-	public ArrayList<Server> getServers() {
-		return servers;
 	}
 }

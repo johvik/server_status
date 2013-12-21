@@ -5,19 +5,12 @@ import java.util.ArrayList;
 import server.status.check.Checker;
 import server.status.check.Status;
 import server.status.check.Status.Result;
-import server.status.db.ServerDbHelper;
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
+import server.status.db.ServerData;
+import server.status.ui.FailNotification;
 import android.content.Context;
-import android.content.Intent;
-import android.support.v4.app.NotificationCompat;
 import android.util.Pair;
 
 public class Server implements Comparable<Server> {
-	public static final String INTENT_ID = "sid";
-	public static final String BROADCAST_UPDATE = "server.status.UPDATE";
-
 	private long id;
 	private String host;
 	private boolean checkRunning;
@@ -111,12 +104,9 @@ public class Server implements Comparable<Server> {
 			checkRunning = false;
 		}
 		// Send initial update to indicate that it started (or not)
-		boolean updated = ServerDbHelper.getInstance(context).update(this);
-		if (updated) {
-			Intent intent = new Intent(BROADCAST_UPDATE);
-			intent.putExtra(INTENT_ID, id);
-			context.sendBroadcast(intent);
-		}
+		ServerData serverData = ServerData.getInstance();
+		serverData.updateSync(context, this);
+
 		// Run all checkers and update results
 		for (int i = 0; i < size; i++) {
 			Checker checker = checkers.get(i);
@@ -125,14 +115,9 @@ public class Server implements Comparable<Server> {
 			if (i + 1 == size) {
 				checkRunning = false;
 			}
-			boolean saved = ServerDbHelper.getInstance(context).save(this,
-					checker, status);
+			boolean saved = serverData.saveSync(context, this, checker, status);
 			if (saved) {
 				results.set(i, status);
-				// Send update
-				Intent intent = new Intent(BROADCAST_UPDATE);
-				intent.putExtra(INTENT_ID, id);
-				context.sendBroadcast(intent);
 				if (status.result == Result.PASS) {
 					count++;
 				}
@@ -140,40 +125,7 @@ public class Server implements Comparable<Server> {
 		}
 		if (count < size) {
 			// Something failed, show notification
-			Intent intent = new Intent(context, MainActivity.class);
-			intent.putExtra(INTENT_ID, id);
-			String host = this.host;
-			if (host.trim().length() == 0) {
-				host = context.getString(R.string.empty_host);
-			}
-			NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle();
-			for (int i = 0; i < size; i++) {
-				Status result = results.get(i);
-				if (result.result != Result.PASS) {
-					inboxStyle.addLine(checkers.get(i).getName(context) + " "
-							+ result.reason);
-				}
-			}
-			String summary = context.getString(R.string.notification_text_fail,
-					count, size);
-			inboxStyle.setSummaryText(summary);
-			PendingIntent pendingIntent = PendingIntent.getActivity(context, 0,
-					intent, PendingIntent.FLAG_UPDATE_CURRENT);
-			NotificationManager notificationManager = (NotificationManager) context
-					.getSystemService(Context.NOTIFICATION_SERVICE);
-			NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(
-					context)
-					.setContentTitle(
-							context.getString(R.string.notification_title_fail,
-									host)).setContentText(summary)
-					.setSmallIcon(R.drawable.ic_stat_fail)
-					.setContentIntent(pendingIntent).setAutoCancel(true)
-					.setStyle(inboxStyle);
-			if (settings.notificationSound()) {
-				// Play sound
-				notificationBuilder.setDefaults(Notification.DEFAULT_SOUND);
-			}
-			notificationManager.notify((int) id, notificationBuilder.build());
+			FailNotification.show(context, settings, this);
 		}
 	}
 
@@ -216,5 +168,14 @@ public class Server implements Comparable<Server> {
 	@Override
 	public int compareTo(Server another) {
 		return Long.valueOf(id).compareTo(another.id);
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (o instanceof Server) {
+			Server other = (Server) o;
+			return id == other.id;
+		}
+		return false;
 	}
 }
