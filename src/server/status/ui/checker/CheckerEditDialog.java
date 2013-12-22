@@ -75,18 +75,23 @@ public abstract class CheckerEditDialog extends DialogFragment {
 
 	protected abstract void updateEditView(View view);
 
+	/**
+	 * Get a dialog to edit the checker
+	 * 
+	 * @param checker
+	 * @return The dialog or null if no settings are available
+	 */
 	public static CheckerEditDialog getEditDialog(Checker checker) {
 		switch (checker.getType()) {
 		case HTTP:
 			return new HttpEditDialog();
 		case HTTPS:
-			// TODO
+			return new HttpsEditDialog();
 		case PING:
-			// TODO
+			return null;
 		case SOCKET:
 			// TODO
 		default:
-			// Will cause null pointer exception
 			return null;
 		}
 	}

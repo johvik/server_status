@@ -68,6 +68,30 @@ public class Https extends Checker {
 		this(in.readLong(), in.readInt(), in.readInt(), in.readInt() == 1);
 	}
 
+	public int getPort() {
+		return port;
+	}
+
+	public int getResponseCode() {
+		return responseCode;
+	}
+
+	public boolean getAllCertificates() {
+		return allCertificates;
+	}
+
+	public void setPort(int port) {
+		this.port = port;
+	}
+
+	public void setResponseCode(int responseCode) {
+		this.responseCode = responseCode;
+	}
+
+	public void setAllCertificates(boolean allCertificates) {
+		this.allCertificates = allCertificates;
+	}
+
 	@Override
 	public Status check(String host, Settings settings) {
 		try {

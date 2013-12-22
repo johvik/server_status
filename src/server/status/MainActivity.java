@@ -226,10 +226,19 @@ public class MainActivity extends FragmentActivity implements
 		editCheckerIndex = index;
 		Checker checker = server.getCheckers().get(index);
 		CheckerEditDialog dialog = CheckerEditDialog.getEditDialog(checker);
-		Bundle args = new Bundle();
-		args.putParcelable(CheckerEditDialog.INTENT_CHECKER, checker);
-		dialog.setArguments(args);
-		dialog.show(getSupportFragmentManager(), "CheckerEditDialog");
+		if (dialog != null) {
+			Bundle args = new Bundle();
+			args.putParcelable(CheckerEditDialog.INTENT_CHECKER, checker);
+			dialog.setArguments(args);
+			dialog.show(getSupportFragmentManager(), "CheckerEditDialog");
+		} else {
+			Context context = getApplicationContext();
+			Toast.makeText(
+					context,
+					getString(R.string.checker_no_settings,
+							checker.getName(context)), Toast.LENGTH_SHORT)
+					.show();
+		}
 	}
 
 	@Override

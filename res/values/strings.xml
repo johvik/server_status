@@ -41,7 +41,9 @@
     <string name="hint_host_change">Hostname or IP</string>
     <string name="port">Port</string>
     <string name="response_code">Response code</string>
+    <string name="all_certificates">Accept all certificates</string>
     <string name="checker_edit_title">Edit %1$s</string>
+    <string name="checker_no_settings">%1$s has no settings</string>
 
     <string-array name="checkers_array">
         <item>@string/checker_http</item>
