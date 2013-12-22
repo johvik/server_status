@@ -306,7 +306,18 @@ public class ServerDbHelper extends SQLiteOpenHelper {
 		cursor.close();
 	}
 
-	// TODO Clean up results if server gets removed while update is running
+	@SuppressWarnings("static-method")
+	synchronized void cleanup() {
+		SQLiteDatabase db = instance.getWritableDatabase();
+		// Remove entries not in the server DB
+		Cursor cursor = db.rawQuery("DELETE FROM "
+				+ CheckerStatusEntry.TABLE_NAME + " WHERE "
+				+ CheckerStatusEntry.COLUMN_NAME_SERVER + " NOT IN (SELECT "
+				+ ServerEntry._ID + " FROM " + ServerEntry.TABLE_NAME + ")",
+				null);
+		cursor.close();
+		db.close();
+	}
 
 	@Override
 	public void onCreate(SQLiteDatabase db) {

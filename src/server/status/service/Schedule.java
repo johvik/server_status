@@ -25,6 +25,8 @@ public class Schedule extends BroadcastReceiver {
 				service.putExtra(ServerCheck.INTENT_SERVER_ID, server.getId());
 				context.startService(service);
 			}
+			// Run cleanup
+			serverData.cleanupSync(context);
 		}
 	}
 

@@ -170,6 +170,11 @@ public class ServerData extends Observable {
 		return saved;
 	}
 
+	@SuppressWarnings("static-method")
+	public void cleanupSync(Context context) {
+		ServerDbHelper.getInstance(context).cleanup();
+	}
+
 	public SortedList<Server> getServers() {
 		return servers;
 	}
