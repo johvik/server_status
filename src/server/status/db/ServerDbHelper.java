@@ -71,7 +71,7 @@ public class ServerDbHelper extends SQLiteOpenHelper {
 		return instance;
 	}
 
-	public synchronized boolean insert(Server server) {
+	synchronized boolean insert(Server server) {
 		SQLiteDatabase db = instance.getWritableDatabase();
 		db.beginTransaction();
 		try {
@@ -96,7 +96,7 @@ public class ServerDbHelper extends SQLiteOpenHelper {
 		}
 	}
 
-	public synchronized boolean update(Server server) {
+	synchronized boolean update(Server server) {
 		SQLiteDatabase db = instance.getWritableDatabase();
 		db.beginTransaction();
 		try {
@@ -129,7 +129,7 @@ public class ServerDbHelper extends SQLiteOpenHelper {
 	 * @param server
 	 * @return True on success.
 	 */
-	public synchronized boolean delete(Server server) {
+	synchronized boolean delete(Server server) {
 		SQLiteDatabase db = instance.getWritableDatabase();
 		db.beginTransaction();
 		try {
@@ -209,8 +209,7 @@ public class ServerDbHelper extends SQLiteOpenHelper {
 	}
 
 	@SuppressWarnings("static-method")
-	public synchronized boolean save(Server server, Checker checker,
-			Status status) {
+	synchronized boolean save(Server server, Checker checker, Status status) {
 		SQLiteDatabase db = instance.getWritableDatabase();
 		db.beginTransaction();
 		try {
@@ -249,39 +248,11 @@ public class ServerDbHelper extends SQLiteOpenHelper {
 	}
 
 	/**
-	 * Load server by id.
-	 * 
-	 * @param serverId
-	 *            Id of the server.
-	 * @return The server or null if not found.
-	 */
-	public synchronized Server load(long serverId) {
-		Server res = null;
-		SQLiteDatabase db = instance.getReadableDatabase();
-		Cursor cursor = db.query(ServerEntry.TABLE_NAME, new String[] {
-				ServerEntry._ID, ServerEntry.COLUMN_NAME_HOST,
-				ServerEntry.COLUMN_NAME_CHECK_RUNNING },
-				ServerEntry._ID + "=?",
-				new String[] { String.valueOf(serverId) }, null, null, null);
-		if (cursor.moveToFirst()) {
-			long id = cursor.getLong(0);
-			String host = cursor.getString(1);
-			boolean checkRunning = cursor.getInt(2) == 1;
-
-			res = new Server(id, host, checkRunning);
-			loadCheckerStatus(res, db);
-		}
-		cursor.close();
-		db.close();
-		return res;
-	}
-
-	/**
 	 * Loads all servers.
 	 * 
 	 * @return All servers.
 	 */
-	public synchronized ArrayList<Server> load() {
+	synchronized ArrayList<Server> load() {
 		ArrayList<Server> res = new ArrayList<Server>();
 		SQLiteDatabase db = instance.getReadableDatabase();
 		Cursor cursor = db.query(ServerEntry.TABLE_NAME, new String[] {
