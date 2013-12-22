@@ -27,6 +27,14 @@ public class Socket extends Checker {
 		this(in.readLong(), in.readInt());
 	}
 
+	public int getPort() {
+		return port;
+	}
+
+	public void setPort(int port) {
+		this.port = port;
+	}
+
 	@Override
 	public Status check(String host, Settings settings) {
 		try {

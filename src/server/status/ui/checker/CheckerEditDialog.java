@@ -90,7 +90,7 @@ public abstract class CheckerEditDialog extends DialogFragment {
 		case PING:
 			return null;
 		case SOCKET:
-			// TODO
+			return new SocketEditDialog();
 		default:
 			return null;
 		}
