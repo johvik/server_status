@@ -41,9 +41,21 @@ public class Starter {
 		}
 	}
 
+	/**
+	 * Starts the alarm and if it is running it stops the old one
+	 * 
+	 * @param context
+	 */
 	public static void update(Context context) {
-		// TODO Update alarm instead
-		stop(context);
+		// Doesn't seem to be possible to reschedule an alarm based on the
+		// previous one...
+		Intent intent = new Intent(context, Schedule.class);
+		boolean alarmUp = PendingIntent.getBroadcast(context, REQUEST_CODE,
+				intent, PendingIntent.FLAG_NO_CREATE) != null;
+		if (alarmUp) {
+			// Stop it first
+			stop(context);
+		}
 		start(context, Settings.ENABLE_DELAY);
 	}
 
