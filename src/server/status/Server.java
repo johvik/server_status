@@ -131,10 +131,16 @@ public class Server implements Comparable<Server> {
 		ServerData serverData = ServerData.getInstance();
 		serverData.updateSync(context, this);
 
+		int retries = settings.getRetries();
 		// Run all checkers and update results
 		for (int i = 0; i < size; i++) {
 			Checker checker = checkers.get(i);
 			Status status = checker.check(host, settings);
+			// Retry if it doesn't pass
+			for (int j = 0; j < retries && status.result != Result.PASS; j++) {
+				checker = checkers.get(i);
+				status = checker.check(host, settings);
+			}
 			// Done when last has been checked
 			if (i + 1 == size) {
 				checkRunning = false;

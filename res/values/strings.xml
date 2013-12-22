@@ -2,6 +2,7 @@
 <resources>
 
     <string name="app_name">Server Status</string>
+    <string name="two">2</string>
     <string name="ten">10</string>
     <string name="five_thousand">5000</string>
     <string name="button_ok">OK</string>
@@ -27,6 +28,8 @@
     <string name="pref_interval_summ">%1$s minutes between updates</string>
     <string name="pref_timeout">Timeout</string>
     <string name="pref_timeout_summ">Connections timeout after %1$s milliseconds</string>
+    <string name="pref_retries">Retries</string>
+    <string name="pref_retries_summ">Performs each check up to %1$s extra times</string>
     <string name="never">Never</string>
     <string name="empty_server_list">No servers added =(</string>
     <string name="empty_host">&lt;Blank&gt;</string>

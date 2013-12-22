@@ -23,5 +23,11 @@
         android:key="pref_timeout"
         android:summary="@string/pref_timeout_summ"
         android:title="@string/pref_timeout" />
+    <EditTextPreference
+        android:defaultValue="@string/two"
+        android:inputType="number"
+        android:key="pref_retries"
+        android:summary="@string/pref_retries_summ"
+        android:title="@string/pref_retries" />
 
 </PreferenceScreen>

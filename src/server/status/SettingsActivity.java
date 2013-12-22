@@ -12,6 +12,7 @@ public class SettingsActivity extends PreferenceActivity implements
 	public static final String PREF_SOUND = "pref_sound";
 	public static final String PREF_INTERVAL = "pref_interval";
 	public static final String PREF_TIMEOUT = "pref_timeout";
+	public static final String PREF_RETRIES = "pref_retries";
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -26,6 +27,7 @@ public class SettingsActivity extends PreferenceActivity implements
 				.getSharedPreferences();
 		updateIntervalSummary(sharedPreferences);
 		updateTimeoutSummary(sharedPreferences);
+		updateRetriesSummary(sharedPreferences);
 		sharedPreferences.registerOnSharedPreferenceChangeListener(this);
 	}
 
@@ -52,6 +54,8 @@ public class SettingsActivity extends PreferenceActivity implements
 		} else if (key.equals(PREF_TIMEOUT)) {
 			updateTimeoutSummary(sharedPreferences);
 			Starter.update(getApplicationContext());
+		} else if (key.equals(PREF_RETRIES)) {
+			updateRetriesSummary(sharedPreferences);
 		}
 	}
 
@@ -65,5 +69,11 @@ public class SettingsActivity extends PreferenceActivity implements
 		findPreference(PREF_TIMEOUT).setSummary(
 				getString(R.string.pref_timeout_summ,
 						sharedPreferences.getString(PREF_TIMEOUT, "5000")));
+	}
+
+	private void updateRetriesSummary(SharedPreferences sharedPreferences) {
+		findPreference(PREF_RETRIES).setSummary(
+				getString(R.string.pref_retries_summ,
+						sharedPreferences.getString(PREF_RETRIES, "2")));
 	}
 }

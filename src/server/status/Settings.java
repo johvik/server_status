@@ -12,6 +12,7 @@ public class Settings {
 	private long intervalMS = 600000; // 10min
 	private int timeoutMS = 5000;
 	private int timeout = 5;
+	private int retries = 2;
 
 	public void loadSettings(Context context) {
 		SharedPreferences sharedPref = PreferenceManager
@@ -20,10 +21,12 @@ public class Settings {
 		notificationSound = sharedPref.getBoolean(SettingsActivity.PREF_SOUND,
 				true);
 		try {
-			intervalMS = ((long) Integer.parseInt(sharedPref.getString(
-					SettingsActivity.PREF_INTERVAL, "10"))) * 60000;
+			intervalMS = Long.parseLong(sharedPref.getString(
+					SettingsActivity.PREF_INTERVAL, "10")) * 60000L;
 			setTimeoutMS(Integer.parseInt(sharedPref.getString(
 					SettingsActivity.PREF_TIMEOUT, "5000")));
+			retries = Integer.parseInt(sharedPref.getString(
+					SettingsActivity.PREF_RETRIES, "2"));
 
 			// Set a minimum time to avoid high load
 			if (intervalMS <= 100) {
@@ -59,5 +62,9 @@ public class Settings {
 
 	public int getTimeout() {
 		return timeout;
+	}
+
+	public int getRetries() {
+		return retries;
 	}
 }
