@@ -37,12 +37,18 @@ public class ServerAdapter extends BaseExpandableListAdapter {
 
 	@Override
 	public Object getChild(int groupPosition, int childPosition) {
+		if (list.get(groupPosition).getSize() == 0) {
+			return null;
+		}
 		Server server = list.get(groupPosition);
 		return server.get(childPosition);
 	}
 
 	@Override
 	public long getChildId(int groupPosition, int childPosition) {
+		if (list.get(groupPosition).getSize() == 0) {
+			return -1;
+		}
 		Server server = list.get(groupPosition);
 		ArrayList<Checker> checkers = server.getCheckers();
 		return checkers.get(childPosition).getId();
@@ -52,17 +58,44 @@ public class ServerAdapter extends BaseExpandableListAdapter {
 		public final TextView text1;
 		public final TextView text2;
 		public final TextView text3;
+		public final boolean empty;
 
 		public ChildViewHolder(TextView text1, TextView text2, TextView text3) {
 			this.text1 = text1;
 			this.text2 = text2;
 			this.text3 = text3;
+			empty = false;
+		}
+
+		public ChildViewHolder() {
+			text1 = null;
+			text2 = null;
+			text3 = null;
+			empty = true;
 		}
 	}
 
 	@Override
 	public View getChildView(int groupPosition, int childPosition,
 			boolean isLastChild, View convertView, ViewGroup parent) {
+		if (childPosition == 0 && list.get(groupPosition).getSize() == 0) {
+			// Show hint when no children
+			if (convertView == null) {
+				convertView = LayoutInflater.from(context).inflate(
+						R.layout.list_item_server_empty, parent, false);
+				convertView.setTag(new ChildViewHolder());
+			} else {
+				ChildViewHolder viewHolder = (ChildViewHolder) convertView
+						.getTag();
+				if (!viewHolder.empty) {
+					// Previous wasn't a empty view
+					convertView = LayoutInflater.from(context).inflate(
+							R.layout.list_item_server_empty, parent, false);
+					convertView.setTag(new ChildViewHolder());
+				}
+			}
+			return convertView;
+		}
 		TextView text1;
 		TextView text2;
 		TextView text3;
@@ -75,9 +108,19 @@ public class ServerAdapter extends BaseExpandableListAdapter {
 			convertView.setTag(new ChildViewHolder(text1, text2, text3));
 		} else {
 			ChildViewHolder viewHolder = (ChildViewHolder) convertView.getTag();
-			text1 = viewHolder.text1;
-			text2 = viewHolder.text2;
-			text3 = viewHolder.text3;
+			if (viewHolder.empty) {
+				// Previous view was empty
+				convertView = LayoutInflater.from(context).inflate(
+						R.layout.list_item_server_details, parent, false);
+				text1 = (TextView) convertView.findViewById(R.id.text1);
+				text2 = (TextView) convertView.findViewById(R.id.text2);
+				text3 = (TextView) convertView.findViewById(R.id.text3);
+				convertView.setTag(new ChildViewHolder(text1, text2, text3));
+			} else {
+				text1 = viewHolder.text1;
+				text2 = viewHolder.text2;
+				text3 = viewHolder.text3;
+			}
 		}
 
 		@SuppressWarnings("unchecked")
@@ -117,7 +160,11 @@ public class ServerAdapter extends BaseExpandableListAdapter {
 
 	@Override
 	public int getChildrenCount(int groupPosition) {
-		return list.get(groupPosition).getServerCount();
+		int size = list.get(groupPosition).getSize();
+		if (size == 0) {
+			return 1;
+		}
+		return size;
 	}
 
 	@Override
@@ -188,6 +235,9 @@ public class ServerAdapter extends BaseExpandableListAdapter {
 
 	@Override
 	public boolean isChildSelectable(int groupPosition, int childPosition) {
+		if (list.get(groupPosition).getSize() == 0) {
+			return false;
+		}
 		return true;
 	}
 }

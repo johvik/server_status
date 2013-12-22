@@ -70,7 +70,7 @@ public class Server implements Comparable<Server> {
 		return count;
 	}
 
-	public int getServerCount() {
+	public int getSize() {
 		return results.size();
 	}
 

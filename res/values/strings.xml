@@ -32,6 +32,7 @@
     <string name="pref_retries_summ">Performs each check up to %1$s extra times</string>
     <string name="never">Never</string>
     <string name="empty_server_list">No servers added =(</string>
+    <string name="empty_server_hint">No checkers, long-click on the server and select "Add checker".</string>
     <string name="empty_host">&lt;Blank&gt;</string>
     <string name="server_remove_fail">Failed to remove server</string>
     <string name="server_save_fail">Failed to save server</string>
