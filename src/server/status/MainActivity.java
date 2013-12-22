@@ -157,7 +157,6 @@ public class MainActivity extends FragmentActivity implements
 				Server.fromId(editServerId));
 		if (server != null) {
 			server.setChecker(editCheckerIndex, checker);
-			server.addChecker(checker);
 			serverData.updateAsync(getApplicationContext(), server,
 					serverSaveFail);
 		}

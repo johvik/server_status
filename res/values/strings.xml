@@ -39,8 +39,8 @@
     <string name="notification_title_fail">%1$s</string>
     <string name="notification_text_fail">%1$s/%2$s checks passed</string>
     <string name="hint_host_change">Hostname or IP</string>
-    <string name="hint_port">Port</string>
-    <string name="hint_response_code">Response code</string>
+    <string name="port">Port</string>
+    <string name="response_code">Response code</string>
     <string name="checker_edit_title">Edit %1$s</string>
 
     <string-array name="checkers_array">

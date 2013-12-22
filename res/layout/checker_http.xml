@@ -3,25 +3,34 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:paddingBottom="@dimen/ui_space"
-    android:paddingTop="@dimen/ui_space" >
+    android:padding="@dimen/ui_space" >
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/port"
+        android:textAppearance="?android:attr/textAppearanceSmallInverse" />
 
     <EditText
         android:id="@+id/editText1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:ems="10"
-        android:hint="@string/hint_port"
-        android:inputType="number"
-        android:paddingBottom="@dimen/ui_space" />
+        android:hint="@string/port"
+        android:inputType="number" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/response_code"
+        android:textAppearance="?android:attr/textAppearanceSmallInverse" />
 
     <EditText
         android:id="@+id/editText2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:ems="10"
-        android:hint="@string/hint_response_code"
-        android:inputType="number"
-        android:paddingTop="@dimen/ui_space" />
+        android:hint="@string/response_code"
+        android:inputType="number" />
 
 </LinearLayout>
