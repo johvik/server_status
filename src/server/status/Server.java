@@ -35,6 +35,19 @@ public class Server implements Comparable<Server> {
 		return host;
 	}
 
+	/**
+	 * Use this to get the host that will be displayed.
+	 * 
+	 * @param context
+	 * @return The host or a string constant if empty
+	 */
+	public String getDisplayHost(Context context) {
+		if (host.trim().length() == 0) {
+			return context.getString(R.string.empty_host);
+		}
+		return host;
+	}
+
 	public long getId() {
 		return id;
 	}

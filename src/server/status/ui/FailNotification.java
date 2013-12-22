@@ -20,10 +20,6 @@ public class FailNotification {
 
 	public static void show(Context context, Settings settings, Server server) {
 		Intent intent = new Intent(context, MainActivity.class);
-		String host = server.getHost();
-		if (host.trim().length() == 0) {
-			host = context.getString(R.string.empty_host);
-		}
 		NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle();
 		ArrayList<Status> results = server.getResults();
 		ArrayList<Checker> checkers = server.getCheckers();
@@ -46,8 +42,8 @@ public class FailNotification {
 				context)
 				.setContentTitle(
 						context.getString(R.string.notification_title_fail,
-								host)).setContentText(summary)
-				.setSmallIcon(R.drawable.ic_stat_fail)
+								server.getDisplayHost(context)))
+				.setContentText(summary).setSmallIcon(R.drawable.ic_stat_fail)
 				.setContentIntent(pendingIntent).setAutoCancel(true)
 				.setStyle(inboxStyle);
 		int defaults = Notification.DEFAULT_LIGHTS;

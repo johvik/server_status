@@ -13,7 +13,6 @@ public class HttpsEditDialog extends CheckerEditDialog {
 
 	@Override
 	public int getResource() {
-		// TODO Fix check box color
 		return R.layout.checker_https;
 	}
 

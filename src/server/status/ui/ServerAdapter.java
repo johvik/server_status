@@ -164,11 +164,7 @@ public class ServerAdapter extends BaseExpandableListAdapter {
 		}
 
 		Server server = list.get(groupPosition);
-		String host = server.getHost();
-		if (host.trim().length() == 0) {
-			host = context.getString(R.string.empty_host);
-		}
-		text1.setText(host);
+		text1.setText(server.getDisplayHost(context));
 		if (server.hasFail()) {
 			text1.setTextColor(COLOR_FAIL);
 		} else if (server.hasInconclusive()) {

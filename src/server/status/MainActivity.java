@@ -1,10 +1,6 @@
 package server.status;
 
 import server.status.check.Checker;
-import server.status.check.Http;
-import server.status.check.Https;
-import server.status.check.Ping;
-import server.status.check.Socket;
 import server.status.db.ServerData;
 import server.status.service.Starter;
 import server.status.ui.ConfirmDialog;
@@ -98,12 +94,7 @@ public class MainActivity extends FragmentActivity implements
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.action_add_server:
-			Server server = new Server("192.168.1.200");
-			server.addChecker(new Http(8000, 302));
-			server.addChecker(new Https(8080, 200, true));
-			server.addChecker(new Ping());
-			server.addChecker(new Socket(50022));
-			serverData.insertAsync(getApplicationContext(), server,
+			serverData.insertAsync(getApplicationContext(), new Server(""),
 					serverSaveFail);
 			return true;
 		case R.id.action_settings:
@@ -200,8 +191,10 @@ public class MainActivity extends FragmentActivity implements
 		editServerId = server.getId();
 		ConfirmDialog dialog = new ConfirmDialog();
 		Bundle args = new Bundle();
-		args.putString(ConfirmDialog.INTENT_MESSAGE,
-				getString(R.string.server_remove_confirm, server.getHost()));
+		args.putString(
+				ConfirmDialog.INTENT_MESSAGE,
+				getString(R.string.server_remove_confirm,
+						server.getDisplayHost(getApplicationContext())));
 		dialog.setArguments(args);
 		dialog.show(getSupportFragmentManager(), "ConfirmDialog");
 	}

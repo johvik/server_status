@@ -37,6 +37,7 @@
         android:id="@+id/checkBox1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/all_certificates" />
+        android:text="@string/all_certificates"
+        android:textColor="@color/checkbox" />
 
 </LinearLayout>

@@ -36,7 +36,6 @@ public class SelectCheckerDialog extends DialogFragment {
 		builder.setItems(R.array.checkers_array, new OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
-				// TODO Also select settings if appropriate?
 				listener.onSelectChecker(Checker.fromIndex(which));
 			}
 		});

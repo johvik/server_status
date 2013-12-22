@@ -140,7 +140,8 @@ public class ServerListFragment extends Fragment implements Observer {
 			if (positionType == ExpandableListView.PACKED_POSITION_TYPE_GROUP) {
 				activity.getMenuInflater().inflate(R.menu.server, menu);
 				// Set title of the menu
-				menu.setHeaderTitle(server.getHost());
+				menu.setHeaderTitle(server.getDisplayHost(activity
+						.getApplicationContext()));
 			} else if (positionType == ExpandableListView.PACKED_POSITION_TYPE_CHILD) {
 				int positionChild = ExpandableListView
 						.getPackedPositionChild(info.packedPosition);
